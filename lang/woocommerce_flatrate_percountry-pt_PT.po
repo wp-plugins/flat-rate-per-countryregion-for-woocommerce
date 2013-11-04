@@ -1,0 +1,266 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Flat Rate per Country/Region for WooCommerce v1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2013-11-03 19:38-0000\n"
+"Last-Translator: \n"
+"Language-Team: Webdados <info@webdados.pt>\n"
+"Language: pt_PT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Poedit 1.5.7\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: ../\n"
+"X-Textdomain-Support: yes\n"
+"X-Poedit-SearchPath-0: .\n"
+
+# @ woocommerce_flatrate_percountry
+#. translators: plugin header field 'Description'
+#: woocommerce_flatrate_percountry.php:0
+msgid ""
+"This plugin allows you to set a flat delivery rate per country and/or world "
+"region on WooCommerce."
+msgstr ""
+"Este plugin permite definir uma taxa fixa de entrega por país e/ou região do "
+"mundo no WooCommerce."
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:34
+#: woocommerce_flatrate_percountry.php:182
+msgid "Flat Rate per Country/Region"
+msgstr "Taxa Fixa por País/Região"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:35
+msgid ""
+"Allows you to set a flat delivery rate per country and/or world region.<br/"
+"><br/>If you set a rate for the client's country it will be used. Otherwise, "
+"if you set a rate for client's region it will be used.<br/>If none of the "
+"rates are set, the \"Rest of the World\" rate will be used."
+msgstr ""
+"Permite definir uma taxa fixa de entrega por país e/ou região do mundo.<br/"
+"><br/>Se definir uma taxa para o país do cliente, esta será utilizada. Em "
+"caso contrário, e se definir uma taxa para a região do cliente, esta será "
+"utilizada.<br/>Se nenhuma das taxas for definida, a taxa para o \"Resto do "
+"Mundo\" será utilizada."
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:49
+msgid "Africa - Eastern Africa"
+msgstr "África Oriental"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:53
+msgid "Africa - Middle Africa"
+msgstr "África Central"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:57
+msgid "Africa - Northern Africa"
+msgstr "África - Norte de África"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:61
+msgid "Africa - Southern Africa"
+msgstr "África Austral (Sul)"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:65
+msgid "Africa - Western Africa"
+msgstr "África Ocidental"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:70
+msgid "Americas - Latin America and the Caribbean"
+msgstr "América Latina e Caribe"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:74
+msgid "Americas - Central America"
+msgstr "América Central"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:78
+msgid "Americas - South America"
+msgstr "América do Sul"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:82
+msgid "Americas - Northern America"
+msgstr "América do Norte"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:87
+msgid "Asia - Central Asia"
+msgstr "Ásia Central"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:91
+msgid "Asia - Eastern Asia"
+msgstr "Ásia Oriental"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:95
+msgid "Asia - Southern Asia"
+msgstr "Ásia Meridional (Sul)"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:99
+msgid "Asia - South-Eastern Asia"
+msgstr "Ásia - Sudeste Asiático"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:103
+msgid "Asia - Western Asia"
+msgstr "Ásia Ocidental"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:108
+msgid "Europe - Eastern Europe"
+msgstr "Europa - Leste Europeu"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:112
+msgid "Europe - Northern Europe"
+msgstr "Europa Setentrional (Norte)"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:116
+msgid "Europe - Southern Europe"
+msgstr "Europa Meridional (Sul)"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:120
+msgid "Europe - Western Europe"
+msgstr "Europa Ocidental"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:125
+msgid "Oceania - Australia and New Zealand"
+msgstr "Oceania - Australásia"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:129
+msgid "Oceania - Melanesia"
+msgstr "Oceania - Melanésia"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:133
+msgid "Oceania - Micronesia"
+msgstr "Oceania - Micronésia"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:137
+msgid "Oceania - Polynesia"
+msgstr "Oceania - Polinésia"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:169
+msgid "Global settings"
+msgstr "Definições globais"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:195
+msgid "\"Rest of the World\" Rate"
+msgstr "Taxa para \"Resto do Mundo\""
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:197
+msgid "The shipping fee for all the Countries/Regions not specified bellow."
+msgstr "A taxa de envio para os Países/Regiões não especificados em baixo."
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:202
+msgid "Number of Region rules"
+msgstr "Número de regras para Regiões"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:204
+msgid "How many diferent \"per region\" rates do you want to set?"
+msgstr "Quantas taxas diferentes \"por região\" quer definir?"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:204
+#: woocommerce_flatrate_percountry.php:210
+msgid "Please save the options after changing this value."
+msgstr "Por favor grave as opções depois de alterar este valor."
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:208
+msgid "Number of Country rules"
+msgstr "Número de regras para Países"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:210
+msgid "How many diferent \"per country\" rates do you want to set?"
+msgstr "Quantas taxas diferentes \"por país\" quer definir?"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:235
+msgid "Per Region Rates"
+msgstr "Taxas por Região"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:242
+#, php-format
+msgid "Region #%s"
+msgstr "Região #%s"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:244
+msgid "Choose one or more regions for this rule."
+msgstr "Escolha uma ou mais regiões para esta regra."
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:251
+#: woocommerce_flatrate_percountry.php:280
+#, php-format
+msgid "Rate #%s"
+msgstr "Taxa #%s"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:253
+msgid "The shipping fee for the regions specified above."
+msgstr "A taxa de entrega para as regiões especificadas em cima."
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:264
+msgid "Per Country Rates"
+msgstr "Taxas por País"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:271
+#, php-format
+msgid "Country #%s"
+msgstr "País #%s"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:273
+msgid "Choose one or more countries for this rule."
+msgstr "Escolha um ou mais países para esta regra."
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:282
+msgid "The shipping fee for the countries specified above."
+msgstr "A taxa de entrega para os países especificados em cima."
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:294
+msgid ""
+"Click here to see list of regions, and the countries included on each one."
+msgstr "Clique aqui para ver a lista de regiões e os países que as compõem."
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:312
+msgid "Close country list"
+msgstr "Fechar lista de países"
+
+# @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:357
+msgid "Rest of the World"
+msgstr "Resto do Mundo"
