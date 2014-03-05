@@ -3,7 +3,7 @@
  * Plugin Name: Flat Rate per Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
  * Description: This plugin allows you to set a flat delivery rate per country and/or world region on WooCommerce.
- * Version: 1.0
+ * Version: 1.1
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: woocommerce_flatrate_percountry
@@ -174,12 +174,14 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 						'type' 			=> 'checkbox',
 						'label' 		=> __('Enable this shipping method', 'woocommerce'),
 						'default' 		=> 'no',
+						'desc_tip'		=> true
 					),
 					'title' => array(
 						'title' 		=> __('Method Title', 'woocommerce'),
 						'type' 			=> 'text',
 						'description' 	=> __('This controls the title which the user sees during checkout.', 'woocommerce'),
 						'default'		=> __('Flat Rate per Country/Region', $this->id),
+						'desc_tip'		=> true
 					),
 					'tax_status' => array(
 						'title' 		=> __('Tax Status', 'woocommerce'),
@@ -190,42 +192,43 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 								'taxable' 	=> __('Taxable', 'woocommerce'),
 								'none' 		=> __('None', 'woocommerce'),
 							),
+						'desc_tip'		=> true
 					),
 					'fee_world' => array(
 						'title' 		=> __('"Rest of the World" Rate', $this->id).' ('.get_woocommerce_currency().')',
-						'type' 			=> 'text',
+						'type' 			=> 'price',
 						'description'	=> __('The shipping fee for all the Countries/Regions not specified bellow.', $this->id),
 						'default'		=> '',
-						'placeholder'	=>	'0.0',
+						'placeholder'	=> wc_format_localized_price(0),
+						'desc_tip'		=> true
 					),
 					'per_region_count' => array(
 						'title' 		=> __('Number of Region rules', $this->id),
 						'type' 			=> 'number',
 						'description'	=> __('How many diferent "per region" rates do you want to set?', $this->id).' '.__('Please save the options after changing this value.', $this->id),
 						'default'		=> 1,
+						'desc_tip'		=> true
 					),
 					'per_country_count' => array(
 						'title' 		=> __('Number of Country rules', $this->id),
 						'type' 			=> 'number',
 						'description'	=> __('How many diferent "per country" rates do you want to set?', $this->id).' '.__('Please save the options after changing this value.', $this->id),
 						'default'		=> 1,
+						'desc_tip'		=> true
 					),
+					'show_region_country' => array(
+						'title' 		=> __('Show region or country?', $this->id),
+						'type' 			=> 'select',
+						'description' 	=> __('Choose either to show the region or the country name on the checkout screen.', $this->id),
+						'default' 		=> 'region',
+						'options'		=> array(
+								'region' 	=> __('Region', $this->id),
+								'country' 		=> __('Country', $this->id),
+							),
+						'desc_tip'		=> true
+					)
 				);
 				$this->form_fields=$fields;
-				/*TEST*/
-				/*global $woocommerce;
-				$regions=$this->regions;
-				foreach($woocommerce->countries->countries as $key => $country) {
-					$html.='<div>'.$key.' - '.$country.' - ';
-					foreach($regions as $region) {
-						if(in_array($key, $region['countries'])) {
-							$html.='<b>'.$region['name'].'</b>';
-							break;
-						}
-					}
-					$html.='</div>';
-				}
-				echo $html;*/
 			}
 
 			/* Per Region form fields */
@@ -245,14 +248,16 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
-						'options'	=> $this->regionslist
+						'options'	=> $this->regionslist,
+						'desc_tip'		=> true
 					);
 					$this->form_fields['per_region_'.$counter.'_fee']=array(
 						'title' 		=> sprintf(__( 'Rate #%s', $this->id), $counter).' ('.get_woocommerce_currency().')',
-						'type' 			=> 'text',
+						'type' 			=> 'price',
 						'description'	=> __('The shipping fee for the regions specified above.', $this->id),
 						'default'		=> '',
-						'placeholder'	=>	'0.0',
+						'placeholder'	=> wc_format_localized_price(0),
+						'desc_tip'		=> true
 					);
 				}
 			}
@@ -274,14 +279,16 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
-						'options'	=> $woocommerce->countries->countries
+						'options'	=> $woocommerce->countries->countries,
+						'desc_tip'		=> true
 					);
 					$this->form_fields['per_country_'.$counter.'_fee']=array(
 						'title' 		=> sprintf(__( 'Rate #%s', $this->id), $counter).' ('.get_woocommerce_currency().')',
-						'type' 			=> 'text',
+						'type' 			=> 'price',
 						'description'	=> __('The shipping fee for the countries specified above.', $this->id),
 						'default'		=> '',
-						'placeholder'	=>	'0.0',
+						'placeholder'	=> wc_format_localized_price(0),
+						'desc_tip'		=> true
 					);
 				}
 			}
@@ -317,7 +324,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
  			}
 
 			/* Calculate the rate */
-			public function calculate_shipping($package) {
+			public function calculate_shipping($package = array()) {
 				// This is where you'll add your rates
 				global $woocommerce;
 				$label='';
@@ -327,10 +334,13 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 					$count=$this->settings['per_country_count'];
 					for($i=1; $i<=$count; $i++){
 						if (is_array($this->settings['per_country_'.$i.'_country'])) {
-							if (in_array(trim($package['destination']['country']), $this->settings['per_country_'.$i.'_country'])) {
-								$final_rate=floatval($this->settings['per_country_'.$i.'_fee']);
-								$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
-								break;
+							if (in_array(trim($package['destination']['country']), $this->settings['per_country_'.$i.'_country'])) { //Country found in this country rule
+								if (isset( $this->settings['per_country_'.$i.'_fee'] ) && ! empty( $this->settings['per_country_'.$i.'_fee'] )) { //Rate is set for this rule
+									//$final_rate=floatval($this->settings['per_country_'.$i.'_fee']);
+									$final_rate=$this->settings['per_country_'.$i.'_fee'];
+									$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
+									break;
+								}
 							}
 						}
 					}
@@ -338,31 +348,51 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 					if ($final_rate===false) {
 						$count=$this->settings['per_region_count'];
 						for($i=1; $i<=$count; $i++){
-							echo $i;
 							if (is_array($this->settings['per_region_'.$i.'_region'])) {
 								foreach($this->settings['per_region_'.$i.'_region'] as $region) {
-									if (in_array(trim($package['destination']['country']), $this->regions[trim($region)]['countries'])) {
-										$final_rate=floatval($this->settings['per_region_'.$i.'_fee']);
-										$label=$this->regions[trim($region)]['name'];
-										break;
+									if (in_array(trim($package['destination']['country']), $this->regions[trim($region)]['countries'])) { //Country found in this region rule
+										if (isset( $this->settings['per_region_'.$i.'_fee'] ) && ! empty( $this->settings['per_region_'.$i.'_fee'] )) { //Rate is set for this rule
+											//$final_rate=floatval($this->settings['per_region_'.$i.'_fee']);
+											$final_rate=$this->settings['per_region_'.$i.'_fee'];
+											$label=$this->regions[trim($region)]['name'];
+											if (isset( $this->settings['show_region_country'] ) && ! empty( $this->settings['show_region_country'] )) { //Have we choosen Country?
+												if ($this->settings['show_region_country']=='country') {
+													$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
+												}
+											}
+											break;
+										}
 									}
 								}
+								if (!$final_rate===false) break; //Region rate found, break for
 							}
-							if (!$final_rate===false) break;
 						}
 					}
 					//Rest of the World
 					if ($final_rate===false) {
-						$final_rate=floatval($this->settings['fee_world']);
-						$label=__('Rest of the World', $this->id);
+						if (isset( $this->settings['fee_world'] ) && ! empty( $this->settings['fee_world'] )) {
+							//$final_rate=floatval($this->settings['fee_world']);
+							$final_rate=$this->settings['fee_world'];
+							$label=__('Rest of the World', $this->id);
+							if (isset( $this->settings['show_region_country'] ) && ! empty( $this->settings['show_region_country'] )) { //Have we choosen Country?
+								if ($this->settings['show_region_country']=='country') {
+									$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
+								}
+							}
+						}
+					}
+					//Still no rate found. Well... That means it's free right?
+					if ($final_rate===false) {
+						$final_rate=0;
+						$label=__('Flat rate not set', $this->id);
 					}
 				} else {
-					$final_rate=0; //No country?
+					$final_rate=0; //No country? Is the client from outer world?
 				}
 				$rate = array(
 					'id'       => $this->id,
 					'label'    => (trim($label)!='' ? $label : $this->title),
-					'cost'     => $final_rate,
+					'cost'     => floatval($final_rate),
 					'calc_tax' => 'per_order'
 				);
 				// Register the rate
@@ -370,7 +400,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			}
 
 		}
-	}
+		}
 
 	}
 	add_action( 'woocommerce_shipping_init', 'woocommerce_flatrate_percountry_init' );
