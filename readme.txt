@@ -5,7 +5,7 @@ Author URI: http://www.webdados.pt
 Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
 Requires at least: 3.8
 Tested up to: 3.8.1
-Stable tag: 1.1
+Stable tag: 1.2
 
 This plugin allows you to set a flat delivery rate per country and/or world region on WooCommerce.
 
@@ -15,13 +15,16 @@ If you need a simple way to specify a delivery flat rate, based on the country a
 
 A simple example of this plugin usage is to set a value for delivery in your own country (e.g. Portugal), a different value for your continent (e.g. Europe) and a third one for the rest of the world.
 
-You can also create groups for countries and world regions and specify delivery rates for them.
+You can create groups for countries and world regions and specify delivery rates for them.
+
+You can also choose either to apply the shipping fee for the whole order or multiply it per each item.
 
 = Features: =
 
 * Create any number of countries groups and set a specific delivery rate for each group;
 * Create any number of world regions groups and set a specific delivery rate for each group;
 * Specify a fallback "Rest of the World" rate for any destinations not on the groups;
+* Apply the shipping fee for the whole order or multiply it per each item;
 
 == Installation ==
 
@@ -35,10 +38,14 @@ The plugin is new, so no question is frequent. Ask us something ;-)
 
 == Changelog ==
 
+= 1.2 =
+* It's now possible to choose either to apply the shipping fee for the whole order or multiply it per each item.
+* There's new options regardin the title the costumer will see suring checkout.
+
 = 1.1 =
-* It's now possible to choose either to show the region or country name when a region or "rest of the world" rate is used
-* Fix: make sure the price fields now respect the localized settings
-* Fix: when changing countries on the checkout page the plugin does not stall the ajax call anymore and the totals are updated
+* It's now possible to choose either to show the region or country name when a region or "rest of the world" rate is used.
+* Fix: make sure the price fields now respect the localized settings.
+* Fix: when changing countries on the checkout page the plugin does not stall the ajax call anymore and the totals are updated.
 
 = 1.0 =
 * Initial release.
