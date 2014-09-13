@@ -351,7 +351,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
 			/* Removes the "(Free)" text from the shipping label if the rate is zero */
 			public function remove_free_price_text($full_label, $method) {
-				return str_replace(' ('.__('Free', 'woocommerce').')', '**', $full_label);
+				return str_replace(' ('.__('Free', 'woocommerce').')', '', $full_label);
 			}
 
 			/* Calculate the rate */
