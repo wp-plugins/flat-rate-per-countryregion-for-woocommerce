@@ -5,9 +5,9 @@ Author URI: http://www.webdados.pt
 Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 1.4
+Stable tag: 1.4.1
 
-This plugin allows you to set a flat delivery rate per countries and/or world regions (and a fallback "Rest of the World" rate) on WooCommerce.
+This plugin allows you to set a flat delivery rate per countries or world regions (and a fallback "Rest of the World" rate) on WooCommerce.
 
 == Description ==
 
@@ -37,6 +37,9 @@ Use the included automatic install feature on your WordPress admin panel and sea
 The plugin is new, so no question is frequent. Ask us something ;-)
 
 == Changelog ==
+
+= 1.4 =
+* Fix: Minor localization issues solved
 
 = 1.4 =
 * It's now possible to remove the "(Free)" text from the shipping label if the rate is 0. This can be useful if you need to get a quote for the shipping cost from the carrier. (Thanks Saad Sohail)

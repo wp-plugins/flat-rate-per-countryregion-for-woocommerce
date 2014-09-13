@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Flat Rate per Country/Region for WooCommerce v1.4\n"
+"Project-Id-Version: Flat Rate per Country/Region for WooCommerce v1.4.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-13 13:48-0000\n"
+"PO-Revision-Date: 2014-09-13 14:15-0000\n"
 "Last-Translator: Webdados <info@webdados.pt>\n"
 "Language-Team: Webdados <info@webdados.pt>\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgstr ""
 #. translators: plugin header field 'Description'
 #: woocommerce_flatrate_percountry.php:0
 msgid ""
-"This plugin allows you to set a flat delivery rate per countries and/or "
+"This plugin allows you to set a flat delivery rate per countries or "
 "world regions (and a fallback \"Rest of the World\" rate) on WooCommerce."
 msgstr ""
 
@@ -163,29 +163,6 @@ msgstr ""
 msgid "Global settings"
 msgstr ""
 
-# @ woocommerce
-#: woocommerce_flatrate_percountry.php:179
-msgid "Enable/Disable"
-msgstr ""
-
-# @ woocommerce
-#: woocommerce_flatrate_percountry.php:181
-msgid "Enable this shipping method"
-msgstr ""
-
-# @ woocommerce
-#: woocommerce_flatrate_percountry.php:186
-#: woocommerce_flatrate_percountry.php:200
-#: woocommerce_flatrate_percountry.php:201
-#: woocommerce_flatrate_percountry.php:202
-msgid "Method Title"
-msgstr ""
-
-# @ woocommerce
-#: woocommerce_flatrate_percountry.php:188
-msgid "This controls the title which the user sees during checkout."
-msgstr ""
-
 # @ woocommerce_flatrate_percountry
 #: woocommerce_flatrate_percountry.php:188
 msgid "(If chosen below)"
@@ -218,21 +195,6 @@ msgstr ""
 # @ woocommerce_flatrate_percountry
 #: woocommerce_flatrate_percountry.php:200
 msgid "(as defined above)"
-msgstr ""
-
-# @ woocommerce
-#: woocommerce_flatrate_percountry.php:207
-msgid "Tax Status"
-msgstr ""
-
-# @ woocommerce
-#: woocommerce_flatrate_percountry.php:212
-msgid "Taxable"
-msgstr ""
-
-# @ woocommerce
-#: woocommerce_flatrate_percountry.php:213
-msgid "None"
 msgstr ""
 
 # @ woocommerce_flatrate_percountry
@@ -270,7 +232,7 @@ msgid ""
 "carrier."
 msgstr ""
 
-# @ woocommerce
+# @ woocommerce_flatrate_percountry
 #: woocommerce_flatrate_percountry.php:232
 msgid "Remove \"(Free)\" from checkout if delivery rate equals zero"
 msgstr ""

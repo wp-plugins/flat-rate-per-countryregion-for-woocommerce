@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Flat Rate per Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
- * Description: This plugin allows you to set a flat delivery rate per countries and/or world regions (and a fallback "Rest of the World" rate) on WooCommerce.
- * Version: 1.4
+ * Description: This plugin allows you to set a flat delivery rate per countries or world regions (and a fallback "Rest of the World" rate) on WooCommerce.
+ * Version: 1.4.1
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: woocommerce_flatrate_percountry
