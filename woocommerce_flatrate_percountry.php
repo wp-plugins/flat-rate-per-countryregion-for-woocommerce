@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Flat Rate per Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
- * Description: This plugin allows you to set a flat delivery rate per country and/or world region on WooCommerce.
- * Version: 1.3
+ * Description: This plugin allows you to set a flat delivery rate per countries and/or world regions (and a fallback "Rest of the World" rate) on WooCommerce.
+ * Version: 1.4
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: woocommerce_flatrate_percountry
@@ -41,7 +41,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			/* Init the settings */
 			function init() {
 				//Let's sort arrays the right way
-				setlocale(LC_ALL, get_locale());
+				setlocale(LC_COLLATE, get_locale());
 				//Regions - Source: http://www.geohive.com/earth/gen_codes.aspx
 				$this->regions = array(
 					//Africa
@@ -157,6 +157,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				$this->title				= $this->settings['title'];
 				$this->enabled				= $this->settings['enabled'];
 
+				if (isset($this->settings['remove_free'])) {
+					if ($this->settings['remove_free']=='yes') {
+						add_filter('woocommerce_cart_shipping_method_full_label', array($this, 'remove_free_price_text'), 10, 2);
+					}
+				}
+
 				// Save settings in admin if you have any defined
 				add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 
@@ -217,6 +223,14 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 								'per_order' 	=> __('Per order', $this->id),
 								'per_item' 		=> __('Per item', $this->id),
 							),
+						'desc_tip'		=> true
+					),
+					'remove_free' => array(
+						'title' 		=> __('Remove "(Free)"', $this->id),
+						'type' 			=> 'checkbox',
+						'description'	=> __('If the final rate is zero, remove the "(Free)" text from the checkout screen. Useful if you need to get a quote for the shipping cost from the carrier.', $this->id),
+						'label' 		=> __('Remove "(Free)" from checkout if delivery rate equals zero', 'woocommerce'),
+						'default' 		=> 'no',
 						'desc_tip'		=> true
 					),
 					'fee_world' => array(
@@ -334,6 +348,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
  				<?php $this->generate_settings_html(); ?>
  				</table> <?php
  			}
+
+			/* Removes the "(Free)" text from the shipping label if the rate is zero */
+			public function remove_free_price_text($full_label, $method) {
+				return str_replace(' ('.__('Free', 'woocommerce').')', '**', $full_label);
+			}
 
 			/* Calculate the rate */
 			public function calculate_shipping($package = array()) {
