@@ -3,7 +3,7 @@
  * Plugin Name: Flat Rate per Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
  * Description: This plugin allows you to set a flat delivery rate per countries or world regions (and a fallback "Rest of the World" rate) on WooCommerce.
- * Version: 1.4.1
+ * Version: 1.4.2
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: woocommerce_flatrate_percountry
@@ -30,12 +30,20 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			 */
 			public function __construct() {
 				$this->id					= 'woocommerce_flatrate_percountry';
-            	load_plugin_textdomain($this->id, false, dirname(plugin_basename(__FILE__)) . '/lang/');
+				load_plugin_textdomain($this->id, false, dirname(plugin_basename(__FILE__)) . '/lang/');
 				$this->method_title			= __('Flat Rate per Country/Region', $this->id);
 				$this->method_description	= __('Allows you to set a flat delivery rate per country and/or world region.<br/><br/>If you set a rate for the client\'s country it will be used. Otherwise, if you set a rate for client\'s region it will be used.<br/>If none of the rates are set, the "Rest of the World" rate will be used.', $this->id).'<br/><br/>'.__('You can also choose either to apply the shipping fee for the whole order or multiply it per each item.', $this->id);
 				$this->init();
-        		$this->init_form_fields_per_region();
-        		$this->init_form_fields_per_country();
+				$this->init_form_fields_per_region();
+				$this->init_form_fields_per_country();
+				//Fix 1.4.2 - Change "per_country_1_country" to "per_country_1_c" 
+				$count=$this->settings['per_region_count'];
+				for($counter = 1; $count >= $counter; $counter++) {
+					if (isset($this->settings['per_country_'.$counter.'_country'])) {
+						$this->settings['per_country_'.$counter.'_c']=$this->settings['per_country_'.$counter.'_country'];
+						unset($this->settings['per_country_'.$counter.'_country']);
+					}
+				}
 			}
 
 			/* Init the settings */
@@ -172,8 +180,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			function init_form_fields() {
 				$fields = array(
 					'global_def' => array(
-						'title'         => __('Global settings', $this->id),
-						'type'          => 'title'
+						'title'		 => __('Global settings', $this->id),
+						'type'		  => 'title'
 					),
 					'enabled' => array(
 						'title' 		=> __('Enable/Disable', 'woocommerce'),
@@ -263,8 +271,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			function init_form_fields_per_region() {
 				//global $woocommerce;
 				$this->form_fields['per_region']=array(
-					'title'         => __('Per Region Rates', $this->id),
-					'type'          => 'title'
+					'title'		 => __('Per Region Rates', $this->id),
+					'type'		  => 'title'
 				);
 				$count=$this->settings['per_region_count'];
 				for($counter = 1; $count >= $counter; $counter++) {
@@ -293,12 +301,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			function init_form_fields_per_country() {
 				global $woocommerce;
 				$this->form_fields['per_country']=array(
-					'title'         => __('Per Country Rates', $this->id),
-					'type'          => 'title'
+					'title'		 => __('Per Country Rates', $this->id),
+					'type'		  => 'title'
 				);
 				$count=$this->settings['per_country_count'];
 				for($counter = 1; $count >= $counter; $counter++) {
-					$this->form_fields['per_country_'.$counter.'_country']=array(
+					$this->form_fields['per_country_'.$counter.'_c']=array(
 						'title'		=> sprintf(__( 'Country #%s', $this->id), $counter),
 						'type'		=> 'multiselect',
 						'description'	=> __('Choose one or more countries for this rule.', $this->id),
@@ -364,8 +372,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 					//Country
 					$count=$this->settings['per_country_count'];
 					for($i=1; $i<=$count; $i++){
-						if (is_array($this->settings['per_country_'.$i.'_country'])) {
-							if (in_array(trim($package['destination']['country']), $this->settings['per_country_'.$i.'_country'])) { //Country found in this country rule
+						if (is_array($this->settings['per_country_'.$i.'_c'])) {
+							if (in_array(trim($package['destination']['country']), $this->settings['per_country_'.$i.'_c'])) { //Country found in this country rule
 								if (isset($this->settings['per_country_'.$i.'_fee']) && is_numeric($this->settings['per_country_'.$i.'_fee'])) { //Rate is set for this rule
 									$final_rate=$this->settings['per_country_'.$i.'_fee'];
 									$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
@@ -431,9 +439,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 					$final_rate=0; //No country? Is the client from outer world?
 				}
 				$rate = array(
-					'id'       => $this->id,
-					'label'    => (trim($label)!='' ? $label : $this->title),
-					'cost'     => floatval($final_rate),
+					'id'	   => $this->id,
+					'label'	=> (trim($label)!='' ? $label : $this->title),
+					'cost'	 => floatval($final_rate),
 					'calc_tax' => 'per_order'
 				);
 				//Is it per item?
