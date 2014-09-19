@@ -1,30 +1,32 @@
-=== Flat Rate per Country/Region for WooCommerce ===
+=== Flat Rate per State/Country/Region for WooCommerce ===
 Contributors: webdados, wonderm00n
-Tags: woocommerce, shipping, delivery, ecommerce, e-commerce, country, countries, region, continent, continents, world
+Tags: woocommerce, shipping, delivery, ecommerce, e-commerce, country, countries, region, continent, continents, world, states, state, districts
 Author URI: http://www.webdados.pt
 Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 1.4.2
+Stable tag: 2.0
 
-This plugin allows you to set a flat delivery rate per countries or world regions (and a fallback "Rest of the World" rate) on WooCommerce.
+This plugin allows you to set a flat delivery rate per States, Countries or World Regions on WooCommerce.
 
 == Description ==
 
-If you need a simple way to specify a delivery flat rate, based on the country and/or world region of the buyer, on WooCommerce for WordPress, this plugin is for you!
+If you need a simple way to specify a delivery flat rate, based on the state and/or country and/or world region of the delivery address, on WooCommerce for WordPress, this plugin is for you!
 
-A simple example of this plugin usage is to set a value for delivery in your own country (e.g. Portugal), a different value for your continent (e.g. Europe) and a third one for the rest of the world.
+A simple example of this plugin usage is to set a value for delivery in a specific state (e.g. Lisbon), the rest of your own country (e.g. Portugal), a different value for your continent (e.g. Europe) and a last one for the rest of the world.
 
-You can create groups for countries and world regions and specify delivery rates for them.
+You can create groups for states, countries and world regions and specify delivery rates for them.
 
-You can also choose either to apply the shipping fee for the whole order or multiply it per each item.
+For each group you can choose either to apply the shipping fee for the whole order or multiply it per each item. You can also set a total order value from which the shipping will be free.
 
 = Features: =
 
-* Create any number of countries groups and set a specific delivery rate for each group;
-* Create any number of world regions groups and set a specific delivery rate for each group;
-* Specify a fallback "Rest of the World" rate for any destinations not on the groups;
-* Apply the shipping fee for the whole order or multiply it per each item;
+* Create any number of states groups/rules and set a specific delivery rate for each group;
+* Create any number of countries groups/rules and set a specific delivery rate for each group;
+* Create any number of world regions groups/rules and set a specific delivery rate for each group;
+* Specify a fallback "Rest of the World" rate for any destinations not specified on the groups;
+* For each group/rule, apply the shipping fee for the whole order or multiply it per each item;
+* For each group/rule, set total order value from which the shipping is free;
 
 == Installation ==
 
@@ -37,6 +39,14 @@ Use the included automatic install feature on your WordPress admin panel and sea
 The plugin is new, so no question is frequent. Ask us something ;-)
 
 == Changelog ==
+
+= 2.0 =
+* It's now also possible to set rates for states
+* Apply rate "Per order" / "Per item" setting is now individual for each group
+* Possibility to set a total order value from which the shipping fee is free, also individual for each group
+* New special "European Union" region group
+* Some tweaks on the settings screen for improved usability
+* Fix: changed the textdomain argument to string instead of variable
 
 = 1.4.2 =
 * Fix: In some server configurations the single countries field was not being saved to the database
