@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Flat Rate per State/Country/Region for WooCommerce v2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-19 16:41-0000\n"
+"PO-Revision-Date: 2014-09-19 18:01-0000\n"
 "Last-Translator: Wonderm00n <wonderm00n@gmail.com>\n"
 "Language-Team: Wonderm00n <wonderm00n@gmail.com>\n"
 "Language: pt_PT\n"
@@ -209,8 +209,8 @@ msgstr "País"
 # @ woocommerce_flatrate_percountry
 #: flat-rate-per-countryregion-for-woocommerce.php:213
 #: flat-rate-per-countryregion-for-woocommerce.php:216
-msgid "Country or Region name or \"Rest of the World\""
-msgstr "País ou Nome da Região ou \"Resto do Mundo\""
+msgid "State or Country or Region name or \"Rest of the World\""
+msgstr "Estado/Distrito ou País ou Nome da Região ou \"Resto do Mundo\""
 
 # @ woocommerce_flatrate_percountry
 #: flat-rate-per-countryregion-for-woocommerce.php:214

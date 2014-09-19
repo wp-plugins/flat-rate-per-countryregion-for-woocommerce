@@ -3,7 +3,7 @@
  * Plugin Name: Flat Rate per State/Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
  * Description: This plugin allows you to set a flat delivery rate per States, Countries or World Regions (and a fallback "Rest of the World" rate) on WooCommerce.
- * Version: 2.0
+ * Version: 2.0.1
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: flat-rate-per-countryregion-for-woocommerce
@@ -178,7 +178,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				}
 
 				// Save settings in admin if you have any defined
-				add_action( 'woocommerce_update_options_shipping_' . 'flat-rate-per-countryregion-for-woocommerce', array( $this, 'process_admin_options' ) );
+				add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 
 			}
 
@@ -210,10 +210,10 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 						'default'		=> 'region',
 						'options'		=> array(
 								'country'		=> __('Country', 'flat-rate-per-countryregion-for-woocommerce'),
-								'region'		=> __('Country or Region name or "Rest of the World"', 'flat-rate-per-countryregion-for-woocommerce'),
+								'region'		=> __('State or Country or Region name or "Rest of the World"', 'flat-rate-per-countryregion-for-woocommerce'),
 								'title'		=> __('Method Title', 'woocommerce').' '.__('(as defined above)', 'flat-rate-per-countryregion-for-woocommerce'),
 								'title_country'	=> __('Method Title', 'woocommerce').' + '.__('Country', 'flat-rate-per-countryregion-for-woocommerce'),
-								'title_region'	=> __('Method Title', 'woocommerce').' + '.__('Country or Region name or "Rest of the World"', 'flat-rate-per-countryregion-for-woocommerce'),
+								'title_region'	=> __('Method Title', 'woocommerce').' + '.__('State or Country or Region name or "Rest of the World"', 'flat-rate-per-countryregion-for-woocommerce'),
 							),
 						'desc_tip'		=> true
 					),
@@ -554,30 +554,34 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				if(trim($package['destination']['country'])!='') {
 					$final_rate=-1;
 					//State
-					/*if ($final_rate==-1) {
+					if ($final_rate==-1) {
 						$count=intval($this->settings['per_state_count']);
 						for($i=1; $i<=$count; $i++){
-							if (is_array($this->settings['per_country_'.$i.'_c'])) {
-								if (in_array(trim($package['destination']['country']), $this->settings['per_country_'.$i.'_c'])) { //Country found in this country rule
-									if (isset($this->settings['per_country_'.$i.'_fee']) && is_numeric($this->settings['per_country_'.$i.'_fee'])) { //Rate is set for this rule
-										//The rate
-										$final_rate=$this->settings['per_country_'.$i.'_fee'];
-										//Free?
-										if (isset($this->settings['per_country_'.$i.'_fr']) && ! empty($this->settings['per_country_'.$i.'_fr'])) {
-											if (intval($this->settings['per_country_'.$i.'_fr'])>0) {
-												if ($order_total>=intval($this->settings['per_country_'.$i.'_fr'])) $final_rate=0; //Free
+							if (is_array($this->settings['per_state_'.$i.'_s'])) {
+								if (trim($package['destination']['country'])==$this->settings['per_state_'.$i.'_c']) { //País correcto
+									$states=$woocommerce->countries->get_states($this->settings['per_state_'.$counter.'_c']);
+									//var_dump($states);
+									if (in_array(trim($package['destination']['state']), $this->settings['per_state_'.$i.'_s'])) { //State found in this state rule
+										if (isset($this->settings['per_state_'.$i.'_fee']) && is_numeric($this->settings['per_state_'.$i.'_fee'])) { //Rate is set for this rule
+											//The rate
+											$final_rate=$this->settings['per_state_'.$i.'_fee'];
+											//Free?
+											if (isset($this->settings['per_state_'.$i.'_fr']) && ! empty($this->settings['per_state_'.$i.'_fr'])) {
+												if (intval($this->settings['per_state_'.$i.'_fr'])>0) {
+													if ($order_total>=intval($this->settings['per_state_'.$i.'_fr'])) $final_rate=0; //Free
+												}
 											}
+											//Per order or per item?
+											if (isset($this->settings['per_state_'.$i.'_t']) && ! empty($this->settings['per_state_'.$i.'_t'])) $tax_type=$this->settings['per_state_'.$i.'_t'];
+											//The label
+											$label=$states[trim($package['destination']['country'])][trim($package['destination']['state'])];
+											break;
 										}
-										//Per order or per item?
-										if (isset($this->settings['per_country_'.$i.'_t']) && ! empty($this->settings['per_country_'.$i.'_t'])) $tax_type=$this->settings['per_country_'.$i.'_t'];
-										//The label
-										$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
-										break;
 									}
 								}
 							}
 						}
-					}*/
+					}
 					//Country
 					if ($final_rate==-1) {
 						$count=intval($this->settings['per_country_count']);

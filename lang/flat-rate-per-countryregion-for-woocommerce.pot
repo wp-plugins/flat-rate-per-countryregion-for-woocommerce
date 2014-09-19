@@ -197,7 +197,7 @@ msgstr ""
 # @ flat-rate-per-countryregion-for-woocommerce
 #: flat-rate-per-countryregion-for-woocommerce.php:213
 #: flat-rate-per-countryregion-for-woocommerce.php:216
-msgid "Country or Region name or \"Rest of the World\""
+msgid "State or Country or Region name or \"Rest of the World\""
 msgstr ""
 
 # @ flat-rate-per-countryregion-for-woocommerce
