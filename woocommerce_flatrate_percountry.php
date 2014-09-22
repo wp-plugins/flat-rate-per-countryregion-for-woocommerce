@@ -3,7 +3,7 @@
  * Plugin Name: Flat Rate per State/Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
  * Description: This plugin allows you to set a flat delivery rate per States, Countries or World Regions (and a fallback "Rest of the World" rate) on WooCommerce.
- * Version: 2.0.1
+ * Version: 2.1
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: flat-rate-per-countryregion-for-woocommerce
@@ -214,6 +214,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 								'title'		=> __('Method Title', 'woocommerce').' '.__('(as defined above)', 'flat-rate-per-countryregion-for-woocommerce'),
 								'title_country'	=> __('Method Title', 'woocommerce').' + '.__('Country', 'flat-rate-per-countryregion-for-woocommerce'),
 								'title_region'	=> __('Method Title', 'woocommerce').' + '.__('State or Country or Region name or "Rest of the World"', 'flat-rate-per-countryregion-for-woocommerce'),
+								'rule_name'	=> __('Rule name', 'flat-rate-per-countryregion-for-woocommerce'),
 							),
 						'desc_tip'		=> true
 					),
@@ -239,6 +240,14 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 					'world_title' => array(
 						'title'		 => __('"Rest of the World" Rates', 'flat-rate-per-countryregion-for-woocommerce'),
 						'type'		 => 'title'
+					),
+					'world_rulename' => array(
+						'title'		=> '<span class="rules_items">'.__( 'Rule name', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+						'type'			=> 'text',
+						'description'	=> __('The name for this rule, if you choose to show it to the client.', 'flat-rate-per-countryregion-for-woocommerce'),
+						'default'		=> '',
+						'placeholder'	=> '',
+						'desc_tip'		=> true
 					),
 					'tax_type' => array(
 						'title'		=> '<span class="rules_items">'.__('Apply rate', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
@@ -303,6 +312,14 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 						'options'	=> $this->regionslist,
 						'desc_tip'		=> true
 					);
+					$this->form_fields['per_region_'.$counter.'_txt']=array(
+						'title'		=> '<span class="rules_items">'.__( 'Rule name', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+						'type'			=> 'text',
+						'description'	=> __('The name for this rule, if you choose to show it to the client.', 'flat-rate-per-countryregion-for-woocommerce'),
+						'default'		=> '',
+						'placeholder'	=> '',
+						'desc_tip'		=> true
+					);
 					$this->form_fields['per_region_'.$counter.'_t']= array(
 						'title'		=> '<span class="rules_items">'.__('Apply rate', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
 						'type'			=> 'select',
@@ -362,6 +379,14 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
 						'options'	=> $woocommerce->countries->countries,
+						'desc_tip'		=> true
+					);
+					$this->form_fields['per_country_'.$counter.'_txt']=array(
+						'title'		=> '<span class="rules_items">'.__( 'Rule name', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+						'type'			=> 'text',
+						'description'	=> __('The name for this rule, if you choose to show it to the client.', 'flat-rate-per-countryregion-for-woocommerce'),
+						'default'		=> '',
+						'placeholder'	=> '',
 						'desc_tip'		=> true
 					);
 					$this->form_fields['per_country_'.$counter.'_t']= array(
@@ -434,6 +459,14 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 							'css'		=> 'width: 450px;',
 							'default'	=> '',
 							'options'	=> $woocommerce->countries->get_states($this->settings['per_state_'.$counter.'_c']),
+							'desc_tip'		=> true
+						);
+						$this->form_fields['per_state_'.$counter.'_txt']=array(
+							'title'		=> '<span class="rules_items">'.__( 'Rule name', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+							'type'			=> 'text',
+							'description'	=> __('The name for this rule, if you choose to show it to the client.', 'flat-rate-per-countryregion-for-woocommerce'),
+							'default'		=> '',
+							'placeholder'	=> '',
 							'desc_tip'		=> true
 						);
 						$this->form_fields['per_state_'.$counter.'_t']= array(
@@ -574,7 +607,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 											//Per order or per item?
 											if (isset($this->settings['per_state_'.$i.'_t']) && ! empty($this->settings['per_state_'.$i.'_t'])) $tax_type=$this->settings['per_state_'.$i.'_t'];
 											//The label
-											$label=$states[trim($package['destination']['country'])][trim($package['destination']['state'])];
+											if ($this->settings['show_region_country']=='rule_name') {
+												$label=$this->settings['per_state_'.$i.'_txt'];
+											} else {
+												$label=$states[trim($package['destination']['country'])][trim($package['destination']['state'])];
+											}
 											break;
 										}
 									}
@@ -600,7 +637,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 										//Per order or per item?
 										if (isset($this->settings['per_country_'.$i.'_t']) && ! empty($this->settings['per_country_'.$i.'_t'])) $tax_type=$this->settings['per_country_'.$i.'_t'];
 										//The label
-										$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
+										if ($this->settings['show_region_country']=='rule_name') {
+											$label=$this->settings['per_country_'.$i.'_txt'];
+										} else {
+											$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
+										}
 										break;
 									}
 								}
@@ -626,7 +667,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 											//Per order or per item?
 											if (isset($this->settings['per_region_'.$i.'_t']) && ! empty($this->settings['per_region_'.$i.'_t'])) $tax_type=$this->settings['per_region_'.$i.'_t'];
 											//The label
-											$label=$this->regions[trim($region)]['name'];
+											if ($this->settings['show_region_country']=='rule_name') {
+												$label=$this->settings['per_region_'.$i.'_txt'];
+											} else {
+												$label=$this->regions[trim($region)]['name'];
+											}
 											break;
 										}
 									}
@@ -640,14 +685,20 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 						if (isset($this->settings['fee_world']) && is_numeric($this->settings['fee_world'])) {
 							$final_rate=$this->settings['fee_world'];
 							if (isset($this->settings['tax_type']) && ! empty($this->settings['tax_type'])) $tax_type=$this->settings['tax_type'];
-							$label=__('Rest of the World', 'flat-rate-per-countryregion-for-woocommerce');
+							//The label
+							if ($this->settings['show_region_country']=='rule_name') {
+								$label=$this->settings['world_rulename'];
+							} else {
+								$label=__('Rest of the World', 'flat-rate-per-countryregion-for-woocommerce');
+							}
 						}
 					}
 					//Let's customize the label
 					if (isset($this->settings['show_region_country']) && ! empty($this->settings['show_region_country'])) {
 						switch($this->settings['show_region_country']) {
 							case 'region':
-								//The default - already set
+							case 'rule_name':
+								//The default or already set
 								break;
 							case 'country':
 								$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
