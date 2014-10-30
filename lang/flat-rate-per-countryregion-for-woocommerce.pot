@@ -294,6 +294,16 @@ msgid ""
 msgstr ""
 
 # @ flat-rate-per-countryregion-for-woocommerce
+msgid "Free for shipping classes"
+msgstr ""
+
+# @ flat-rate-per-countryregion-for-woocommerce
+msgid ""
+"The shipping fee will be free if at least one item belongs to the "
+"selected shipping classes."
+msgstr ""
+
+# @ flat-rate-per-countryregion-for-woocommerce
 #: flat-rate-per-countryregion-for-woocommerce.php:278
 msgid "Per Region Rates"
 msgstr ""
