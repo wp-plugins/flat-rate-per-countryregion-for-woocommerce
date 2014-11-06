@@ -5,7 +5,7 @@ Author URI: http://www.webdados.pt
 Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 2.3
+Stable tag: 2.3.1
 
 This plugin allows you to set a flat delivery rate per States, Countries or World Regions on WooCommerce.
 
@@ -39,6 +39,9 @@ Use the included automatic install feature on your WordPress admin panel and sea
 The plugin is new, so no question is frequent. Ask us something ;-)
 
 == Changelog ==
+
+= 2.3.1 =
+* Fix: Great Britain was declared on the European Union group as UK and not GB
 
 = 2.3 =
 * It's now possible to set a free shipping fee (for the all order), if there's at least one item that belongs to a specific shipping class. This is set per rule.
