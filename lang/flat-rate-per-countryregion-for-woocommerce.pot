@@ -439,3 +439,7 @@ msgstr ""
 #: flat-rate-per-countryregion-for-woocommerce.php:668
 msgid "Flat rate not set"
 msgstr ""
+
+# @ flat-rate-per-countryregion-for-woocommerce
+msgid "Choose all languages variations"
+msgstr ""

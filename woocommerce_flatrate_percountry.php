@@ -3,7 +3,7 @@
  * Plugin Name: Flat Rate per State/Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
  * Description: This plugin allows you to set a flat delivery rate per States, Countries or World Regions (and a fallback "Rest of the World" rate) on WooCommerce.
- * Version: 2.3.1
+ * Version: 2.3.2
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: flat-rate-per-countryregion-for-woocommerce
@@ -40,17 +40,16 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 				load_plugin_textdomain('flat-rate-per-countryregion-for-woocommerce', false, dirname(plugin_basename(__FILE__)) . '/lang/');
 				$this->method_title			= __('Flat Rate per State/Country/Region', 'flat-rate-per-countryregion-for-woocommerce');
 				$this->method_description	= __('Allows you to set a flat delivery rate per country and/or world region.<br/><br/>If you set a rate for the client\'s country it will be used. Otherwise, if you set a rate for client\'s region it will be used.<br/>If none of the rates are set, the "Rest of the World" rate will be used.', 'flat-rate-per-countryregion-for-woocommerce').'<br/><br/>'.__('You can also choose either to apply the shipping fee for the whole order or multiply it per each item.', 'flat-rate-per-countryregion-for-woocommerce');
-				$this->shipping_classes=array();
-				if ( WC()->shipping->get_shipping_classes() ) {
-					foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
-						$this->shipping_classes[$shipping_class->slug]=$shipping_class->name;
-					}
+				if (function_exists('icl_object_id')) {
+					$this->shipping_classes=$this->get_all_shipping_classes_wpml();
+				} else {
+					$this->shipping_classes=$this->get_all_shipping_classes();
 				}
 				$this->init();
 				$this->init_form_fields_per_region();
 				$this->init_form_fields_per_country();
 				//Fix 1.4.2 - Change "per_country_1_country" to "per_country_1_c" 
-				$count=$this->settings['per_region_count'];
+				$count=(isset($this->settings['per_region_count']) ? intval($this->settings['per_region_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
 					if (isset($this->settings['per_country_'.$counter.'_country'])) {
 						$this->settings['per_country_'.$counter.'_c']=$this->settings['per_country_'.$counter.'_country'];
@@ -192,7 +191,64 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 
 				// Save settings in admin if you have any defined
 				add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+				if (function_exists('icl_object_id')) add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'register_wpml_strings'));
 
+			}
+
+			function get_all_shipping_classes() {
+				$shipping_classes=array();
+				if ( WC()->shipping->get_shipping_classes() ) {
+					foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
+						$shipping_classes[$shipping_class->slug]=$shipping_class->name;
+					}
+				}
+				return $shipping_classes;
+			}
+
+			/**
+			 * WPML compatibility
+			 */
+			function register_wpml_strings() {
+				$to_register=array(
+				//	'title',			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+				//	'world_rulename',	//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+				);
+				//Region
+				$count=(isset($this->settings['per_region_count']) ? intval($this->settings['per_region_count']) : 0);
+				for($counter = 1; $count >= $counter; $counter++) {
+				//	$to_register[]='per_region_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+				}
+				//Country
+				$count=(isset($this->settings['per_country_count']) ? intval($this->settings['per_country_count']) : 0);
+				for($counter = 1; $count >= $counter; $counter++) {
+				//	$to_register[]='per_country_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+				}
+				//State
+				$count=(isset($this->settings['per_state_count']) ? intval($this->settings['per_state_count']) : 0);
+				for($counter = 1; $count >= $counter; $counter++) {
+				//	$to_register[]='per_state_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+				}
+				foreach($to_register as $string) {
+					icl_register_string($this->id, $this->id.'_'.$string, $this->settings[$string]);
+				}
+			}
+
+			function get_all_shipping_classes_wpml() {
+				$shipping_classes=array();
+				$terms=get_terms('product_shipping_class', array(
+					'hide_empty'	=> false
+				));
+				global $sitepress;
+				$langs=$sitepress->get_active_languages();
+				foreach($terms as $term) {
+					$shipping_classes[$term->slug]=$term->name;
+					foreach($langs as $lang => $language) {
+						if ($term_tr=vinha_get_translated_term($term->term_id, 'product_shipping_class', $lang)) {
+							$shipping_classes[$term_tr->slug]=$term_tr->name;
+						}
+					}
+				}
+				return $shipping_classes;
 			}
 
 			/* The form */
@@ -290,9 +346,9 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'desc_tip'		=> true
 					),
 					'world_free_class' => array(
-						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
 						'type'		=> 'multiselect',
-						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce'),
+						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
@@ -318,7 +374,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 					'default'		=> 0,
 					'desc_tip'		=> true
 				);
-				$count=intval($this->settings['per_region_count']);
+				$count=(isset($this->settings['per_region_count']) ? intval($this->settings['per_region_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
 					$this->form_fields['per_region_'.$counter.'_sep']=array(
 						'title'		=> sprintf(__( 'Region rule #%s', 'flat-rate-per-countryregion-for-woocommerce'), $counter),
@@ -371,9 +427,9 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'desc_tip'		=> true
 					);
 					$this->form_fields['per_region_'.$counter.'_fr_class']=array(
-						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
 						'type'		=> 'multiselect',
-						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce'),
+						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
@@ -397,7 +453,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 					'default'		=> 0,
 					'desc_tip'		=> true
 				);
-				$count=intval($this->settings['per_country_count']);
+				$count=(isset($this->settings['per_country_count']) ? intval($this->settings['per_country_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
 					$this->form_fields['per_country_'.$counter.'_sep']=array(
 						'title'		=> sprintf(__( 'Country rule #%s', 'flat-rate-per-countryregion-for-woocommerce'), $counter),
@@ -450,9 +506,9 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'desc_tip'		=> true
 					);
 					$this->form_fields['per_country_'.$counter.'_fr_class']=array(
-						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
 						'type'		=> 'multiselect',
-						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce'),
+						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
@@ -476,7 +532,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 					'default'		=> 0,
 					'desc_tip'		=> true
 				);
-				$count=intval($this->settings['per_state_count']);
+				$count=(isset($this->settings['per_state_count']) ? intval($this->settings['per_state_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
 					$this->form_fields['per_state_'.$counter.'_sep']=array(
 						'title'		=> sprintf(__( 'State rule #%s', 'flat-rate-per-countryregion-for-woocommerce'), $counter),
@@ -540,9 +596,9 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 							'desc_tip'		=> true
 						);
 						$this->form_fields['per_state_'.$counter.'_fr_class']=array(
-							'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+							'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
 							'type'		=> 'multiselect',
-							'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce'),
+							'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
 							'class'		=> 'chosen_select',
 							'css'		=> 'width: 450px;',
 							'default'	=> '',
