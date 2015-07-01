@@ -3,7 +3,7 @@
  * Plugin Name: Flat Rate per State/Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
  * Description: This plugin allows you to set a flat delivery rate per States, Countries or World Regions (and a fallback "Rest of the World" rate) on WooCommerce.
- * Version: 2.3.2
+ * Version: 2.4
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: flat-rate-per-countryregion-for-woocommerce
@@ -40,7 +40,8 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 				load_plugin_textdomain('flat-rate-per-countryregion-for-woocommerce', false, dirname(plugin_basename(__FILE__)) . '/lang/');
 				$this->method_title			= __('Flat Rate per State/Country/Region', 'flat-rate-per-countryregion-for-woocommerce');
 				$this->method_description	= __('Allows you to set a flat delivery rate per country and/or world region.<br/><br/>If you set a rate for the client\'s country it will be used. Otherwise, if you set a rate for client\'s region it will be used.<br/>If none of the rates are set, the "Rest of the World" rate will be used.', 'flat-rate-per-countryregion-for-woocommerce').'<br/><br/>'.__('You can also choose either to apply the shipping fee for the whole order or multiply it per each item.', 'flat-rate-per-countryregion-for-woocommerce');
-				if (function_exists('icl_object_id')) {
+				$this->wpml = function_exists('icl_object_id') && function_exists('icl_register_string');
+				if ($this->wpml) {
 					$this->shipping_classes=$this->get_all_shipping_classes_wpml();
 				} else {
 					$this->shipping_classes=$this->get_all_shipping_classes();
@@ -142,9 +143,19 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'countries' => array('AT', 'BE', 'FR', 'DE', 'LI', 'LU', 'MC', 'NL', 'CH'),
 					),
 					//Special EU Group
-					'EU_EU' => array(
+					/*'EU_EU' => array(
 						'name' => __('European Union', 'flat-rate-per-countryregion-for-woocommerce'),
 						'countries' => array('BE', 'BG', 'CZ', 'DK', 'DE', 'EE', 'IE', 'GR', 'ES', 'FR', 'HR', 'IT', 'CY', 'LV', 'LT', 'LU', 'HU', 'MT', 'NL', 'AT', 'PL', 'PT', 'RO', 'SI', 'SK', 'FI', 'SE', 'GB'),
+					),*/
+					//Special EU Group - From WooCommerce
+					'EU_EU' => array(
+						'name' => __('European Union', 'flat-rate-per-countryregion-for-woocommerce'),
+						'countries' => WC()->countries->get_european_union_countries()
+					),
+					//Special EU Group + Monaco and Isle of Man - From WooCommerce
+					'EU_EUVAT' => array(
+						'name' => __('European Union', 'flat-rate-per-countryregion-for-woocommerce').' + '.__('Monaco and Isle of Man', 'flat-rate-per-countryregion-for-woocommerce').' (EU VAT)',
+						'countries' => WC()->countries->get_european_union_countries('eu_vat')
 					),
 					//Oceania
 					'OC_ANZ' => array(
@@ -166,8 +177,18 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 					/*
 					'UNCLASSIFIED' => array(
 						'name' => __('Unclassified', 'flat-rate-per-countryregion-for-woocommerce'),
-						'countries' => array('AQ', 'BV', 'IO', 'TF', 'HM', 'GS', 'UM'),
+						'countries' => array('AQ', 'BV', 'IO', 'TF', 'HM', 'AN', 'GS', 'UM'),
 					),
+					*/
+					/*
+					AQ - Antarctica
+					BV - Bouvet Island
+					IO - British Indian Ocean Territory
+					TF - French Southern Territories
+					HM - Heard Island and McDonald Islands
+					AN - Netherlands Antilles
+					GS - South Georgia/Sandwich Islands
+					UM - ?
 					*/
 				);
 				$this->regionslist=array();
@@ -183,6 +204,12 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 				$this->title				= $this->settings['title'];
 				$this->enabled				= $this->settings['enabled'];
 
+				//WPML label
+				if ($this->wpml) {
+					add_filter('woocommerce_cart_shipping_method_full_label', array($this, 'wpml_shipping_method_label'), 9, 2);
+				}
+
+				//Remove "free" from the label
 				if (isset($this->settings['remove_free'])) {
 					if ($this->settings['remove_free']=='yes') {
 						add_filter('woocommerce_cart_shipping_method_full_label', array($this, 'remove_free_price_text'), 10, 2);
@@ -191,15 +218,17 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 
 				// Save settings in admin if you have any defined
 				add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
-				if (function_exists('icl_object_id')) add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'register_wpml_strings'));
+				if ($this->wpml) add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'register_wpml_strings'));
 
 			}
 
 			function get_all_shipping_classes() {
 				$shipping_classes=array();
-				if ( WC()->shipping->get_shipping_classes() ) {
-					foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
-						$shipping_classes[$shipping_class->slug]=$shipping_class->name;
+				if ( $temp=WC()->shipping->get_shipping_classes() ) {
+					if (!is_wp_error($temp)) { //On Multisite we aren't able to get the terms... - To be fixed.
+						foreach ( $temp as $shipping_class ) {
+							$shipping_classes[$shipping_class->slug]=$shipping_class->name;
+						}
 					}
 				}
 				return $shipping_classes;
@@ -210,23 +239,23 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 			 */
 			function register_wpml_strings() {
 				$to_register=array(
-				//	'title',			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
-				//	'world_rulename',	//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+					'title',			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+					'world_rulename',	//WooCommerce Multilingual registers the method titles on his own, so we do not need this
 				);
 				//Region
 				$count=(isset($this->settings['per_region_count']) ? intval($this->settings['per_region_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
-				//	$to_register[]='per_region_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+					$to_register[]='per_region_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
 				}
 				//Country
 				$count=(isset($this->settings['per_country_count']) ? intval($this->settings['per_country_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
-				//	$to_register[]='per_country_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+					$to_register[]='per_country_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
 				}
 				//State
 				$count=(isset($this->settings['per_state_count']) ? intval($this->settings['per_state_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
-				//	$to_register[]='per_state_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+					$to_register[]='per_state_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
 				}
 				foreach($to_register as $string) {
 					icl_register_string($this->id, $this->id.'_'.$string, $this->settings[$string]);
@@ -238,17 +267,29 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 				$terms=get_terms('product_shipping_class', array(
 					'hide_empty'	=> false
 				));
-				global $sitepress;
-				$langs=$sitepress->get_active_languages();
-				foreach($terms as $term) {
-					$shipping_classes[$term->slug]=$term->name;
-					foreach($langs as $lang => $language) {
-						if ($term_tr=vinha_get_translated_term($term->term_id, 'product_shipping_class', $lang)) {
-							$shipping_classes[$term_tr->slug]=$term_tr->name;
+				if (!is_wp_error($terms)) { //On Multisite we aren't able to get the terms... - To be fixed.
+					global $sitepress;
+					$langs=$sitepress->get_active_languages();
+					foreach($terms as $term) {
+						$shipping_classes[$term->slug]=$term->name;
+						foreach($langs as $lang => $language) {
+							if ($term_tr=$this->get_translated_term($term->term_id, 'product_shipping_class', $lang)) {
+								$shipping_classes[$term_tr->slug]=$term_tr->name;
+							}
 						}
 					}
 				}
 				return $shipping_classes;
+			}
+
+			/* Get translated term */
+			function get_translated_term($term_id, $taxonomy, $language) {
+				global $sitepress;
+				$translated_term_id = icl_object_id(intval($term_id), $taxonomy, true, $language);
+				remove_filter( 'get_term', array( $sitepress, 'get_term_adjust_id' ), 1 );
+				$translated_term_object = get_term_by('id', intval($translated_term_id), $taxonomy);
+				add_filter( 'get_term', array( $sitepress, 'get_term_adjust_id' ), 1, 1 );
+				return $translated_term_object;
 			}
 
 			/* The form */
@@ -346,27 +387,36 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'desc_tip'		=> true
 					),
 					'world_free_class' => array(
-						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
+						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').($this->wpml ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
 						'type'		=> 'multiselect',
-						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
+						'description'	=> __('The shipping fee will be free if at least one item, or all items, depending on the setting bellow, belong to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').($this->wpml ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
 						'options'	=> $this->shipping_classes,
 						'desc_tip'		=> true
-					)
+					),
+					'world_free_class_type' => array(
+						'title'		=> '<span class="rules_items">'.__('Free for shipping classes if', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+						'type'			=> 'select',
+						'description'	=> __('Choose either one item on Shipping Class is enough to set the rate as free or all items should belong to the Shipping Classes.', 'flat-rate-per-countryregion-for-woocommerce'),
+						'default'		=> 'one',
+						'options'		=> array(
+							'one'	=> __('At least one item belongs to the class(es) set above', 'flat-rate-per-countryregion-for-woocommerce'),
+							'all'	=> __('All items belong to class(es) set above', 'flat-rate-per-countryregion-for-woocommerce'),
+						),
+						'desc_tip'		=> true
+					),
 				);
 				$this->form_fields=$fields;
 			}
 
 			/* Per Region form fields */
 			function init_form_fields_per_region() {
-				//global $woocommerce;
 				$this->form_fields['per_region']=array(
 					'title'		 => __('Per Region Rates', 'flat-rate-per-countryregion-for-woocommerce'),
 					'type'		 => 'title'
 				);
-				//global $woocommerce;
 				$this->form_fields['per_region_count']=array(
 					'title'		=> __('Number of Region rules', 'flat-rate-per-countryregion-for-woocommerce'),
 					'type'			=> 'number',
@@ -427,13 +477,24 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'desc_tip'		=> true
 					);
 					$this->form_fields['per_region_'.$counter.'_fr_class']=array(
-						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
+						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').($this->wpml ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
 						'type'		=> 'multiselect',
-						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
+						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').($this->wpml ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
 						'options'	=> $this->shipping_classes,
+						'desc_tip'		=> true
+					);
+					$this->form_fields['per_region_'.$counter.'_fr_class_type']=array(
+						'title'		=> '<span class="rules_items">'.__('Free for shipping classes if', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+						'type'			=> 'select',
+						'description'	=> __('Choose either one item on Shipping Class is enough to set the rate as free or all items should belong to the Shipping Classes.', 'flat-rate-per-countryregion-for-woocommerce'),
+						'default'		=> 'one',
+						'options'		=> array(
+							'one'	=> __('At least one item belongs to the class(es) set above', 'flat-rate-per-countryregion-for-woocommerce'),
+							'all'	=> __('All items belong to class(es) set above', 'flat-rate-per-countryregion-for-woocommerce'),
+						),
 						'desc_tip'		=> true
 					);
 				}
@@ -441,7 +502,6 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 
 			/* Per Country form fields */
 			function init_form_fields_per_country() {
-				global $woocommerce;
 				$this->form_fields['per_country']=array(
 					'title'		 => __('Per Country Rates', 'flat-rate-per-countryregion-for-woocommerce'),
 					'type'		  => 'title'
@@ -467,7 +527,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
-						'options'	=> $woocommerce->countries->countries,
+						'options'	=> WC()->countries->countries,
 						'desc_tip'		=> true
 					);
 					$this->form_fields['per_country_'.$counter.'_txt']=array(
@@ -506,13 +566,24 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'desc_tip'		=> true
 					);
 					$this->form_fields['per_country_'.$counter.'_fr_class']=array(
-						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
+						'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').($this->wpml ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
 						'type'		=> 'multiselect',
-						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
+						'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').($this->wpml ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
 						'options'	=> $this->shipping_classes,
+						'desc_tip'		=> true
+					);
+					$this->form_fields['per_country_'.$counter.'_fr_class_type']=array(
+						'title'		=> '<span class="rules_items">'.__('Free for shipping classes if', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+						'type'			=> 'select',
+						'description'	=> __('Choose either one item on Shipping Class is enough to set the rate as free or all items should belong to the Shipping Classes.', 'flat-rate-per-countryregion-for-woocommerce'),
+						'default'		=> 'one',
+						'options'		=> array(
+							'one'	=> __('At least one item belongs to the class(es) set above', 'flat-rate-per-countryregion-for-woocommerce'),
+							'all'	=> __('All items belong to class(es) set above', 'flat-rate-per-countryregion-for-woocommerce'),
+						),
 						'desc_tip'		=> true
 					);
 				}
@@ -520,7 +591,6 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 
 			/* Per State form fields */
 			function init_form_fields_per_state() {
-				global $woocommerce;
 				$this->form_fields['per_state']=array(
 					'title'		 => __('Per State Rates', 'flat-rate-per-countryregion-for-woocommerce'),
 					'type'		  => 'title'
@@ -546,7 +616,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'class'		=> 'chosen_select',
 						'css'		=> 'width: 450px;',
 						'default'	=> '',
-						'options'	=> $woocommerce->countries->countries,
+						'options'	=> WC()->countries->countries,
 						'desc_tip'		=> true
 					);
 					if (isset($this->settings['per_state_'.$counter.'_c']) && !empty($this->settings['per_state_'.$counter.'_c'])) {
@@ -557,7 +627,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 							'class'		=> 'chosen_select',
 							'css'		=> 'width: 450px;',
 							'default'	=> '',
-							'options'	=> $woocommerce->countries->get_states($this->settings['per_state_'.$counter.'_c']),
+							'options'	=> WC()->countries->get_states($this->settings['per_state_'.$counter.'_c']),
 							'desc_tip'		=> true
 						);
 						$this->form_fields['per_state_'.$counter.'_txt']=array(
@@ -596,13 +666,24 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 							'desc_tip'		=> true
 						);
 						$this->form_fields['per_state_'.$counter.'_fr_class']=array(
-							'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
+							'title'		=> '<span class="rules_items">'.__('Free for shipping classes', 'flat-rate-per-countryregion-for-woocommerce').($this->wpml ? '</span><br/><span class="rules_items">('.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce').')' : '').'</span>',
 							'type'		=> 'multiselect',
-							'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').(function_exists('icl_object_id') ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
+							'description'	=> __('The shipping fee will be free if at least one item belongs to the selected shipping classes.', 'flat-rate-per-countryregion-for-woocommerce').($this->wpml ? ' '.__('Choose all languages variations', 'flat-rate-per-countryregion-for-woocommerce') : ''),
 							'class'		=> 'chosen_select',
 							'css'		=> 'width: 450px;',
 							'default'	=> '',
 							'options'	=> $this->shipping_classes,
+							'desc_tip'		=> true
+						);
+						$this->form_fields['per_state_'.$counter.'_fr_class_type']=array(
+							'title'		=> '<span class="rules_items">'.__('Free for shipping classes if', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
+							'type'			=> 'select',
+							'description'	=> __('Choose either one item on Shipping Class is enough to set the rate as free or all items should belong to the Shipping Classes.', 'flat-rate-per-countryregion-for-woocommerce'),
+							'default'		=> 'one',
+							'options'		=> array(
+								'one'	=> __('At least one item belongs to the class(es) set above', 'flat-rate-per-countryregion-for-woocommerce'),
+								'all'	=> __('All items belong to class(es) set above', 'flat-rate-per-countryregion-for-woocommerce'),
+							),
 							'desc_tip'		=> true
 						);
 					} else {
@@ -628,7 +709,6 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 			}
 
 			function admin_options() {
-				global $woocommerce;
 				?>
 				<h3><?php echo $this->method_title; ?></h3>
 				<p><?php echo $this->method_description; ?></p>
@@ -641,7 +721,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						<?php
 						$countries=array();
 						foreach($this->regions[$key]['countries'] as $country) {
-							if (trim($woocommerce->countries->countries[$country])!='') $countries[]=$woocommerce->countries->countries[$country];
+							if (isset(WC()->countries->countries[$country]) && trim(WC()->countries->countries[$country])!='') $countries[]=WC()->countries->countries[$country];
 						}
 						sort($countries, SORT_LOCALE_STRING);
 						echo implode(', ', $countries);
@@ -650,6 +730,22 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						<?php
 					}
 					?>
+					<hr/><p><b><?php _e('NOT ASSIGNED', 'flat-rate-per-countryregion-for-woocommerce'); ?>:</b><br/>
+					<?php
+					$countries=array();
+					foreach(WC()->countries->countries as $code => $country) {
+						$done=false;
+						foreach($this->regions as $region) {
+							if (in_array($code, $region['countries'])) {
+								$done=true;
+							}
+						}
+						if (!$done) $countries[]=WC()->countries->countries[$code];
+					}
+					sort($countries, SORT_LOCALE_STRING);
+					echo implode(', ', $countries);
+					?>
+					</p>
 					<p style="text-align: center;">[<a href="#" onclick="jQuery('#WC_FRPC_Country_List').hide();"><?php _e('Close country list', 'flat-rate-per-countryregion-for-woocommerce'); ?></a>]</p>
 				</div>
 				<table class="form-table">
@@ -698,10 +794,32 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 				return $found_shipping_classes;
 			}
 
+			/* Force correct WPML label translation */
+			function wpml_shipping_method_label($label, $method) {
+
+				$label=$GLOBALS['woocommerce_flatrate_percountry_label'];
+			
+				if ( $method->cost > 0 ) {
+					if ( WC()->cart->tax_display_cart == 'excl' ) {
+						$label .= ': ' . wc_price( $method->cost );
+						if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
+							$label .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+						}
+					} else {
+						$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
+						if ( $method->get_shipping_tax() > 0 && ! WC()->cart->prices_include_tax ) {
+							$label .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
+						}
+					}
+				} elseif ( $method->id !== 'free_shipping' ) {
+					$label .= ' (' . __( 'Free', 'woocommerce' ) . ')';
+				}
+			
+				return $label;
+			}
+
 			/* Calculate the rate */
 			public function calculate_shipping($package = array()) {
-				// This is where you'll add your rates
-				global $woocommerce;
 				//Per order by default
 				$tax_type='per_order';
 				//Order total
@@ -719,8 +837,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						for($i=1; $i<=$count; $i++){
 							if (is_array($this->settings['per_state_'.$i.'_s'])) {
 								if (trim($package['destination']['country'])==$this->settings['per_state_'.$i.'_c']) { //País correcto
-									$states=$woocommerce->countries->get_states($this->settings['per_state_'.$counter.'_c']);
-									//var_dump($states);
+									$states=WC()->countries->get_states($this->settings['per_state_'.$i.'_c']);
 									if (in_array(trim($package['destination']['state']), $this->settings['per_state_'.$i.'_s'])) { //State found in this state rule
 										if (isset($this->settings['per_state_'.$i.'_fee']) && is_numeric($this->settings['per_state_'.$i.'_fee'])) { //Rate is set for this rule
 											//The rate
@@ -734,13 +851,32 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 											//Free based on shipping class?
 											if (is_array($this->settings['per_state_'.$i.'_fr_class'])) {
 												if (count($this->settings['per_state_'.$i.'_fr_class'])>0) {
-													foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
-														if (trim($shipping_class)!='') {
-															if (in_array($shipping_class, $this->settings['per_state_'.$i.'_fr_class'])) {
-																$final_rate=0; //Free
-																break;
+													switch($this->settings['per_state_'.$i.'_fr_class_type']) {
+														case 'all':
+															$final_rate_free=true;
+															foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
+																if (trim($shipping_class)!='') {
+																	if (!in_array($shipping_class, $this->settings['per_state_'.$i.'_fr_class'])) {
+																		$final_rate_free=false; //Not free
+																		break;
+																	}
+																} else {
+																	$final_rate_free=false; //Not free
+																}
 															}
-														}
+															if ($final_rate_free) $final_rate=0; //Free
+															break;
+														//case 'one':
+														default:
+															foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
+																if (trim($shipping_class)!='') {
+																	if (in_array($shipping_class, $this->settings['per_country_'.$i.'_fr_class'])) {
+																		$final_rate=0; //Free
+																		break;
+																	}
+																}
+															}
+															break;
 													}
 												}
 											}
@@ -748,7 +884,14 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 											if (isset($this->settings['per_state_'.$i.'_t']) && ! empty($this->settings['per_state_'.$i.'_t'])) $tax_type=$this->settings['per_state_'.$i.'_t'];
 											//The label
 											if ($this->settings['show_region_country']=='rule_name') {
-												$label=$this->settings['per_state_'.$i.'_txt'];
+												//$label=$this->settings['per_state_'.$i.'_txt'];
+												$label=(
+													$this->wpml
+													?
+													icl_translate($this->id, $this->id.'_per_state_'.$i.'_txt', $this->settings['per_state_'.$i.'_txt'])
+													:
+													$this->settings['per_state_'.$i.'_txt']
+												);
 											} else {
 												$label=$states[trim($package['destination']['country'])][trim($package['destination']['state'])];
 											}
@@ -777,13 +920,32 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 										//Free based on shipping class?
 										if (is_array($this->settings['per_country_'.$i.'_fr_class'])) {
 											if (count($this->settings['per_country_'.$i.'_fr_class'])>0) {
-												foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
-													if (trim($shipping_class)!='') {
-														if (in_array($shipping_class, $this->settings['per_country_'.$i.'_fr_class'])) {
-															$final_rate=0; //Free
-															break;
+												switch($this->settings['per_country_'.$i.'_fr_class_type']) {
+													case 'all':
+														$final_rate_free=true;
+														foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
+															if (trim($shipping_class)!='') {
+																if (!in_array($shipping_class, $this->settings['per_country_'.$i.'_fr_class'])) {
+																	$final_rate_free=false; //Not free
+																	break;
+																}
+															} else {
+																$final_rate_free=false; //Not free
+															}
 														}
-													}
+														if ($final_rate_free) $final_rate=0; //Free
+														break;
+													//case 'one':
+													default:
+														foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
+															if (trim($shipping_class)!='') {
+																if (in_array($shipping_class, $this->settings['per_country_'.$i.'_fr_class'])) {
+																	$final_rate=0; //Free
+																	break;
+																}
+															}
+														}
+														break;
 												}
 											}
 										}
@@ -791,9 +953,16 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 										if (isset($this->settings['per_country_'.$i.'_t']) && ! empty($this->settings['per_country_'.$i.'_t'])) $tax_type=$this->settings['per_country_'.$i.'_t'];
 										//The label
 										if ($this->settings['show_region_country']=='rule_name') {
-											$label=$this->settings['per_country_'.$i.'_txt'];
+											//$label=$this->settings['per_country_'.$i.'_txt'];
+											$label=(
+												$this->wpml
+												?
+												icl_translate($this->id, $this->id.'_per_country_'.$i.'_txt', $this->settings['per_country_'.$i.'_txt'])
+												:
+												$this->settings['per_country_'.$i.'_txt']
+											);
 										} else {
-											$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
+											$label=WC()->countries->countries[trim($package['destination']['country'])];
 										}
 										break;
 									}
@@ -820,13 +989,32 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 											//Free based on shipping class?
 											if (is_array($this->settings['per_region_'.$i.'_fr_class'])) {
 												if (count($this->settings['per_region_'.$i.'_fr_class'])>0) {
-													foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
-														if (trim($shipping_class)!='') {
-															if (in_array($shipping_class, $this->settings['per_region_'.$i.'_fr_class'])) {
-																$final_rate=0; //Free
-																break;
+													switch($this->settings['per_region_'.$i.'_fr_class_type']) {
+														case 'all':
+															$final_rate_free=true;
+															foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
+																if (trim($shipping_class)!='') {
+																	if (!in_array($shipping_class, $this->settings['per_region_'.$i.'_fr_class'])) {
+																		$final_rate_free=false; //Not free
+																		break;
+																	}
+																} else {
+																	$final_rate_free=false; //Not free
+																}
 															}
-														}
+															if ($final_rate_free) $final_rate=0; //Free
+															break;
+														//case 'one':
+														default:
+															foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
+																if (trim($shipping_class)!='') {
+																	if (in_array($shipping_class, $this->settings['per_region_'.$i.'_fr_class'])) {
+																		$final_rate=0; //Free
+																		break;
+																	}
+																}
+															}
+															break;
 													}
 												}
 											}
@@ -834,7 +1022,14 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 											if (isset($this->settings['per_region_'.$i.'_t']) && ! empty($this->settings['per_region_'.$i.'_t'])) $tax_type=$this->settings['per_region_'.$i.'_t'];
 											//The label
 											if ($this->settings['show_region_country']=='rule_name') {
-												$label=$this->settings['per_region_'.$i.'_txt'];
+												//$label=$this->settings['per_region_'.$i.'_txt'];
+												$label=(
+													$this->wpml
+													?
+													icl_translate($this->id, $this->id.'_per_region_'.$i.'_txt', $this->settings['per_region_'.$i.'_txt'])
+													:
+													$this->settings['per_region_'.$i.'_txt']
+												);
 											} else {
 												$label=$this->regions[trim($region)]['name'];
 											}
@@ -860,13 +1055,32 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 							//Free based on shipping class?
 							if (is_array($this->settings['world_free_class'])) {
 								if (count($this->settings['world_free_class'])>0) {
-									foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
-										if (trim($shipping_class)!='') {
-											if (in_array($shipping_class, $this->settings['world_free_class'])) {
-												$final_rate=0; //Free
-												break;
+									switch($this->settings['world_free_class_type']) {
+										case 'all':
+											$final_rate_free=true;
+											foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
+												if (trim($shipping_class)!='') {
+													if (!in_array($shipping_class, $this->settings['world_free_class'])) {
+														$final_rate_free=false; //Not free
+														break;
+													}
+												} else {
+													$final_rate_free=false; //Not free
+												}
 											}
-										}
+											if ($final_rate_free) $final_rate=0; //Free
+											break;
+										//case 'one':
+										default:
+											foreach ($this->find_shipping_classes($package) as $shipping_class => $items) {
+												if (trim($shipping_class)!='') {
+													if (in_array($shipping_class, $this->settings['world_free_class'])) {
+														$final_rate=0; //Free
+														break;
+													}
+												}
+											}
+											break;
 									}
 								}
 							}
@@ -874,7 +1088,14 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 							if (isset($this->settings['tax_type']) && ! empty($this->settings['tax_type'])) $tax_type=$this->settings['tax_type'];
 							//The label
 							if ($this->settings['show_region_country']=='rule_name') {
-								$label=$this->settings['world_rulename'];
+								//$label=$this->settings['world_rulename'];
+								$label=(
+									$this->wpml
+									?
+									icl_translate($this->id, $this->id.'_world_rulename', $this->settings['world_rulename'])
+									:
+									$this->settings['world_rulename']
+								);
 							} else {
 								$label=__('Rest of the World', 'flat-rate-per-countryregion-for-woocommerce');
 							}
@@ -888,16 +1109,37 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 								//The default or already set
 								break;
 							case 'country':
-								$label=$woocommerce->countries->countries[trim($package['destination']['country'])];
+								$label=WC()->countries->countries[trim($package['destination']['country'])];
 								break;
 							case 'title':
-								$label=$this->title;
+								//$label=$this->title;
+								$label=(
+									$this->wpml
+									?
+									icl_translate($this->id, $this->id.'_title', $this->title)
+									:
+									$this->title
+								);
 								break;
 							case 'title_region':
-								$label=$this->title.' - '.$label;
+								//$label=$this->title.' - '.$label;
+								$label=(
+									$this->wpml
+									?
+									icl_translate($this->id, $this->id.'_title', $this->title)
+									:
+									$this->title
+								).' - '.$label;
 								break;
 							case 'title_country':
-								$label=$this->title.' - '.$woocommerce->countries->countries[trim($package['destination']['country'])];
+								//$label=$this->title.' - '.WC()->countries->countries[trim($package['destination']['country'])];
+								$label=(
+									$this->wpml
+									?
+									icl_translate($this->id, $this->id.'_title', $this->title)
+									:
+									$this->title
+								).' - '.WC()->countries->countries[trim($package['destination']['country'])];
 								break;
 							default:
 								//The default - already set
@@ -912,35 +1154,47 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 				} else {
 					$final_rate=0; //No country? Is the client from outer world?
 				}
+				$label=(trim($label)!='' ? $label : $this->title);
+				if ($this->wpml) $GLOBALS['woocommerce_flatrate_percountry_label']=$label; //This is so dirty...
 				$rate = array(
 					'id'	   => $this->id,
-					'label'	=> (trim($label)!='' ? $label : $this->title),
+					'label'	=> $label,
 					'cost'	 => floatval($final_rate),
 					'calc_tax' => 'per_order'
 				);
-				//Is it per item?
-				//if (isset($this->settings['tax_type']) && ! empty($this->settings['tax_type'])) {
-					//switch($this->settings['tax_type']) {
-					switch($tax_type) {
-						case 'per_order':
-							//The default - already set
-							break;
-						case 'per_item':
-							$final_rate_items=0;
-							foreach ($package['contents'] as $item_id => $values) {
-								$_product=$values['data'];
-								if ($values['quantity']>0 && $_product->needs_shipping()) {
-									$final_rate_items+=floatval($final_rate)*floatval($values['quantity']);
+				switch($tax_type) {
+					case 'per_order':
+						//The default - already set
+						break;
+					case 'per_item':
+						$final_rate_items=0;
+						foreach ($package['contents'] as $item_id => $values) {
+							$_product=$values['data'];
+							if ($values['quantity']>0 && $_product->needs_shipping()) {
+								$temp_qty=floatval($values['quantity']);
+								//WooCommerce Product Bundles integration (https://wordpress.org/support/topic/for-use-with-woocommerce-product-bundles)
+								if (get_class($_product) == 'WC_Product_Bundle') {
+									if ($_product->per_product_shipping_active) { //Shipping per product?
+										$temp_qty_bundle=0;
+										$temp_bundles = $_product->get_bundled_items();
+										if (is_array($temp_bundles) && count($temp_bundles) > 0) {
+											foreach ($temp_bundles as $temp_bundle_product) {
+												$temp_qty_bundle += $temp_qty * (float)$temp_bundle_product->get_quantity();
+											}
+										}
+										$temp_qty=$temp_qty_bundle;
+									}
 								}
+								$final_rate_items+=floatval($final_rate)*$temp_qty;
 							}
-							$rate['cost']=$final_rate_items;
-							//$rate['calc_tax']='per_item'; //Not really needed, is it?
-							break;
-						default:
-							//The default - already set
-							break;
-					}
-				//}
+						}
+						$rate['cost']=$final_rate_items;
+						//$rate['calc_tax']='per_item'; //Not really needed, is it?
+						break;
+					default:
+						//The default - already set
+						break;
+				}
 				// Register the rate
 				$this->add_rate($rate);
 			}

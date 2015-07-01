@@ -5,7 +5,7 @@ Author URI: http://www.webdados.pt
 Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
 Requires at least: 3.8
 Tested up to: 4.2.2
-Stable tag: 2.3.2
+Stable tag: 2.4
 
 This plugin allows you to set a flat delivery rate per States, Countries or World Regions on WooCommerce.
 
@@ -27,6 +27,7 @@ For each group you can choose either to apply the shipping fee for the whole ord
 * Specify a fallback "Rest of the World" rate for any destinations not specified on the groups;
 * For each group/rule, apply the shipping fee for the whole order or multiply it per each item;
 * For each group/rule, set total order value from which the shipping is free;
+* For each group/rule, set shipping classes for which the shipping is free;
 
 == Installation ==
 
@@ -39,6 +40,18 @@ Use the included automatic install feature on your WordPress admin panel and sea
 The plugin is new, so no question is frequent. Ask us something ;-)
 
 == Changelog ==
+
+= 2.4 =
+* WPML "now the correct way" integration so that the Shipping Method title can be translated
+* WooCommerce Product Bundles integration (Thanks to Mathias Philippe https://wordpress.org/support/profile/mphilippe)
+* European Union countries now fetched from WooCommerce
+* New special region: European Union + Monaco and Isle of Man (EU VAT)
+* Added the list of countries not assigned to any region - For information propouses only
+* When setting Shipping Classes for free shipping it's now possible to set either all items on the cart must belong to the classes or if only one is enough to set the fee as free
+* Fix: incorrect States rules counter when trying to calculate the rate on the frontend
+* Quick Fix: wp_error testing when getting WooCommerce Shipping Classes on Multisite (we still can't get the terms, but the error is now supressed)
+* Fix: "get_translated_term" internal function was missing and getting WooCommerce Shipping Classes on a WPML install was throwing a fatal error
+* Several minor code syntax tweaks
 
 = 2.3.2 =
 * WPML compatibility (beta)
