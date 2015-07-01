@@ -35,9 +35,13 @@ Use the included automatic install feature on your WordPress admin panel and sea
 
 == Frequently Asked Questions ==
 
-= Why is there no FAQs? =
+= [WPML] How can I translate the Shipping Method title? =
 
-The plugin is new, so no question is frequent. Ask us something ;-)
+After setting everything up you should go to WPML > String Translation and translate the titles there.
+
+= Why is there no more FAQs? =
+
+The plugin is quite new, so no question is frequent. Ask us something ;-)
 
 == Changelog ==
 
