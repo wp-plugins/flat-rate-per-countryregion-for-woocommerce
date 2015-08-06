@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Flat Rate per State/Country/Region for WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Flat Rate per State/Country/Region for WooCommerce 2.4\n"
+"Project-Id-Version: Flat Rate per State/Country/Region for WooCommerce 2.4.1\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/flat-rate-per-countryregion-for-woocommerce\n"
 "POT-Creation-Date: 2015-07-01 14:09:40+00:00\n"
 "MIME-Version: 1.0\n"
@@ -396,6 +396,8 @@ msgstr ""
 #: woocommerce_flatrate_percountry.php:753
 msgid "Close country list"
 msgstr ""
+
+#: woocommerce_flatrate_percountry.php:358
 #: woocommerce_flatrate_percountry.php:1107
 msgid "Rest of the World"
 msgstr ""

@@ -4,8 +4,8 @@ Tags: woocommerce, shipping, delivery, ecommerce, e-commerce, country, countries
 Author URI: http://www.webdados.pt
 Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
 Requires at least: 3.8
-Tested up to: 4.2.2
-Stable tag: 2.4
+Tested up to: 4.2.4
+Stable tag: 2.4.1
 
 This plugin allows you to set a flat delivery rate per States, Countries or World Regions on WooCommerce.
 
@@ -13,7 +13,7 @@ This plugin allows you to set a flat delivery rate per States, Countries or Worl
 
 If you need a simple way to specify a delivery flat rate, based on the state and/or country and/or world region of the delivery address, on WooCommerce for WordPress, this plugin is for you!
 
-A simple example of this plugin usage is to set a value for delivery in a specific state (e.g. Lisbon), the rest of your own country (e.g. Portugal), a different value for your continent (e.g. Europe) and a last one for the rest of the world.
+A simple example of this plugin usage is to set a value for delivery in a specific state (e.g. Lisbon), the rest of your own country (e.g. Portugal), a different value for your continent (e.g. Europe) and a fallback one for the rest of the world.
 
 You can create groups for states, countries and world regions and specify delivery rates for them.
 
@@ -28,10 +28,15 @@ For each group you can choose either to apply the shipping fee for the whole ord
 * For each group/rule, apply the shipping fee for the whole order or multiply it per each item;
 * For each group/rule, set total order value from which the shipping is free;
 * For each group/rule, set shipping classes for which the shipping is free;
+* WPML Compatible;
 
 == Installation ==
 
-Use the included automatic install feature on your WordPress admin panel and search for "Flat Rate per Country/Region for WooCommerce".
+* Use the included automatic install feature on your WordPress admin panel and search for "Flat Rate per Country/Region for WooCommerce";
+* Go to WooCommerce > Settings > Shipping > Flat Rate per State/Country/Region and enable this shipping method;
+* Set up the rate for the "Rest of the World"
+* Define how many world region, country and/or state different rules you'll need and "Save changes"
+* You'll now be able to set up the rates settings for each regions/country/state rule independently (don't forget to "Save changes" again when you're done)
 
 == Frequently Asked Questions ==
 
@@ -39,11 +44,20 @@ Use the included automatic install feature on your WordPress admin panel and sea
 
 After setting everything up you should go to WPML > String Translation and translate the titles there.
 
+Because of the way the WooCommerce Multilingual plugin registers the Shipping Method titles (assuming each methos can only have one title) and because our plugin changes title depending on the State/Country of destination, the strings that must be translated are the ones inside the "woocommerce_flatrate_percountry" domain and not the ones on the "woocommerce" domain.
+
 = Why is there no more FAQs? =
 
-The plugin is quite new, so no question is frequent. Ask us something ;-)
+The plugin is quite recent, so no question is frequent. Ask us something ;-)
 
 == Changelog ==
+
+= 2.4.1 =
+* Better installation instructions
+* Added WPML instructions to the FAQ
+* Bug fix: Taxes were always being added to the cost regardless of the settings
+* Bug fix: All shipping method labels were being override when WPML is active and not only this plugin ones
+* Fix: PHP notice when creating new State rules on the settings page
 
 = 2.4 =
 * WPML "now the correct way" integration so that the Shipping Method title can be translated

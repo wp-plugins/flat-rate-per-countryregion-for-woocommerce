@@ -3,7 +3,7 @@
  * Plugin Name: Flat Rate per State/Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
  * Description: This plugin allows you to set a flat delivery rate per States, Countries or World Regions (and a fallback "Rest of the World" rate) on WooCommerce.
- * Version: 2.4
+ * Version: 2.4.1
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: flat-rate-per-countryregion-for-woocommerce
@@ -58,6 +58,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 					}
 				}
 				$this->init_form_fields_per_state();
+				$this->tax_status = $this->settings['tax_status']; //Important so that WooCommerce knows if it should or shouldn't add taxes to this method
 			}
 
 			/* Init the settings */
@@ -236,29 +237,31 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 
 			/**
 			 * WPML compatibility
+			 * We need to register our own several possible Shipping Method titles because WooCommerce Multilingual assumes each Shipping Method will only have one static title
 			 */
 			function register_wpml_strings() {
 				$to_register=array(
-					'title',			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
-					'world_rulename',	//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+					'title',
+					'world_rulename',
 				);
 				//Region
 				$count=(isset($this->settings['per_region_count']) ? intval($this->settings['per_region_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
-					$to_register[]='per_region_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+					$to_register[]='per_region_'.$counter.'_txt';
 				}
 				//Country
 				$count=(isset($this->settings['per_country_count']) ? intval($this->settings['per_country_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
-					$to_register[]='per_country_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+					$to_register[]='per_country_'.$counter.'_txt';
 				}
 				//State
 				$count=(isset($this->settings['per_state_count']) ? intval($this->settings['per_state_count']) : 0);
 				for($counter = 1; $count >= $counter; $counter++) {
-					$to_register[]='per_state_'.$counter.'_txt';			//WooCommerce Multilingual registers the method titles on his own, so we do not need this
+					$to_register[]='per_state_'.$counter.'_txt';
 				}
 				foreach($to_register as $string) {
-					icl_register_string($this->id, $this->id.'_'.$string, $this->settings[$string]);
+					//Only if the state rule name exists already (we may still be choosing the country for this rule)
+					if (isset($this->settings[$string])) icl_register_string($this->id, $this->id.'_'.$string, $this->settings[$string]);
 				}
 			}
 
@@ -355,7 +358,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 						'title'		=> '<span class="rules_items">'.__( 'Rule name', 'flat-rate-per-countryregion-for-woocommerce').'</span>',
 						'type'			=> 'text',
 						'description'	=> __('The name for this rule, if you choose to show it to the client.', 'flat-rate-per-countryregion-for-woocommerce'),
-						'default'		=> '',
+						'default'		=> __('Rest of the World', 'flat-rate-per-countryregion-for-woocommerce'),
 						'placeholder'	=> '',
 						'desc_tip'		=> true
 					),
@@ -796,25 +799,24 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 
 			/* Force correct WPML label translation */
 			function wpml_shipping_method_label($label, $method) {
-
-				$label=$GLOBALS['woocommerce_flatrate_percountry_label'];
-			
-				if ( $method->cost > 0 ) {
-					if ( WC()->cart->tax_display_cart == 'excl' ) {
-						$label .= ': ' . wc_price( $method->cost );
-						if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
-							$label .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+				if ($method->id==$this->id) {
+					$label=$GLOBALS['woocommerce_flatrate_percountry_label'];
+					if ( $method->cost > 0 ) {
+						if ( WC()->cart->tax_display_cart == 'excl' ) {
+							$label .= ': ' . wc_price( $method->cost );
+							if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
+								$label .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+							}
+						} else {
+							$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
+							if ( $method->get_shipping_tax() > 0 && ! WC()->cart->prices_include_tax ) {
+								$label .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
+							}
 						}
-					} else {
-						$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
-						if ( $method->get_shipping_tax() > 0 && ! WC()->cart->prices_include_tax ) {
-							$label .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
-						}
+					} elseif ( $method->id !== 'free_shipping' ) {
+						$label .= ' (' . __( 'Free', 'woocommerce' ) . ')';
 					}
-				} elseif ( $method->id !== 'free_shipping' ) {
-					$label .= ' (' . __( 'Free', 'woocommerce' ) . ')';
 				}
-			
 				return $label;
 			}
 

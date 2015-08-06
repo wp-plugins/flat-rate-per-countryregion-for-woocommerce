@@ -1,10 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Flat Rate per State/Country/Region for WooCommerce v2.4\n"
+"Project-Id-Version: Flat Rate per State/Country/Region for WooCommerce "
+"v2.4.1\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/flat-rate-per-"
 "countryregion-for-woocommerce\n"
 "POT-Creation-Date: 2015-07-01 14:09:40+00:00\n"
-"PO-Revision-Date: 2015-07-01 15:30-0000\n"
+"PO-Revision-Date: 2015-08-06 10:13-0000\n"
 "Last-Translator: Wonderm00n <wonderm00n@gmail.com>\n"
 "Language-Team: Wonderm00n <wonderm00n@gmail.com>\n"
 "Language: pt_PT\n"
@@ -522,6 +523,7 @@ msgid "Close country list"
 msgstr "Fechar lista de países"
 
 # @ woocommerce_flatrate_percountry
+#: woocommerce_flatrate_percountry.php:358
 #: woocommerce_flatrate_percountry.php:1107
 msgid "Rest of the World"
 msgstr "Resto do Mundo"
