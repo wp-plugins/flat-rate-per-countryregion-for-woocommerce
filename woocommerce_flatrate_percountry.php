@@ -3,7 +3,7 @@
  * Plugin Name: Flat Rate per State/Country/Region for WooCommerce
  * Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
  * Description: This plugin allows you to set a flat delivery rate per States, Countries or World Regions (and a fallback "Rest of the World" rate) on WooCommerce.
- * Version: 2.4.1
+ * Version: 2.4.2
  * Author: Webdados
  * Author URI: http://www.webdados.pt
  * Text Domain: flat-rate-per-countryregion-for-woocommerce
@@ -206,9 +206,7 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 				$this->enabled				= $this->settings['enabled'];
 
 				//WPML label
-				if ($this->wpml) {
-					add_filter('woocommerce_cart_shipping_method_full_label', array($this, 'wpml_shipping_method_label'), 9, 2);
-				}
+				if ($this->wpml) add_filter('woocommerce_cart_shipping_method_full_label', array($this, 'wpml_shipping_method_label'), 9, 2);
 
 				//Remove "free" from the label
 				if (isset($this->settings['remove_free'])) {
@@ -263,6 +261,18 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 					//Only if the state rule name exists already (we may still be choosing the country for this rule)
 					if (isset($this->settings[$string])) icl_register_string($this->id, $this->id.'_'.$string, $this->settings[$string]);
 				}
+				add_action($this->id.'_notices', array($this, 'register_wpml_strings_notice'));
+			}
+			function register_wpml_strings_notice() {
+				?>
+				<div id="message" class="updated">
+					<p>
+						<strong>
+							<?php printf(__( 'You should now check and, if necessary, translate the rule names and method title on <a href="%s">WPML String Translation</a>', 'flat-rate-per-countryregion-for-woocommerce'), 'admin.php?page=wpml-string-translation/menu/string-translation.php&amp;context='.$this->id); ?>
+						</strong>
+					</p>
+				</div>
+				<?php
 			}
 
 			function get_all_shipping_classes_wpml() {
@@ -712,49 +722,100 @@ if (in_array('woocommerce/woocommerce.php', (array) get_option('active_plugins')
 			}
 
 			function admin_options() {
+				do_action($this->id.'_notices');
 				?>
-				<h3><?php echo $this->method_title; ?></h3>
-				<p><?php echo $this->method_description; ?></p>
-				<p><a href="#" onclick="jQuery('#WC_FRPC_Country_List').show();"><?php _e('Click here to see list of regions, and the countries included on each one.', 'flat-rate-per-countryregion-for-woocommerce'); ?></a></p>
-				<div id="WC_FRPC_Country_List" style="display: none; margin: 10px; padding: 10px; background-color: #EEE;">
-					<?php
-					foreach($this->regionslist as $key => $region) {
-						?>
-						<p><b><?php echo $region; ?>:</b><br/>
-						<?php
-						$countries=array();
-						foreach($this->regions[$key]['countries'] as $country) {
-							if (isset(WC()->countries->countries[$country]) && trim(WC()->countries->countries[$country])!='') $countries[]=WC()->countries->countries[$country];
-						}
-						sort($countries, SORT_LOCALE_STRING);
-						echo implode(', ', $countries);
-						?>
-						</p>
-						<?php
-					}
-					?>
-					<hr/><p><b><?php _e('NOT ASSIGNED', 'flat-rate-per-countryregion-for-woocommerce'); ?>:</b><br/>
-					<?php
-					$countries=array();
-					foreach(WC()->countries->countries as $code => $country) {
-						$done=false;
-						foreach($this->regions as $region) {
-							if (in_array($code, $region['countries'])) {
-								$done=true;
+				<div id="wc_flatrate_wd">
+					<div id="wc_flatrate_wd_rightbar">
+						<h4><?php _e('Free technical support (limited)', 'flat-rate-per-countryregion-for-woocommerce'); ?>:</h4>
+						<p><a href="https://wordpress.org/support/plugin/flat-rate-per-countryregion-for-woocommerce" target="_blank">WordPress.org</a></p>
+						<h4><?php _e('Premium technical support or custom WordPress / WooCommerce development', 'flat-rate-per-countryregion-for-woocommerce'); ?>:</h4>
+						<p><a href="http://www.webdados.pt/contactos/" title="<?php echo esc_attr(sprintf(__('Please contact %s', 'flat-rate-per-countryregion-for-woocommerce'), 'Webdados')); ?>" target="_blank"><img src="<?php echo plugins_url('images/webdados.png', __FILE__); ?>" width="200"/></a></p>
+						<h4><?php _e('Help us translate this plugin', 'flat-rate-per-countryregion-for-woocommerce'); ?>:</h4>
+						<p><?php printf(__('Download the <a href="%s">.pot file</a> and send us the translation on your language', 'flat-rate-per-countryregion-for-woocommerce'), plugins_url('lang/flat-rate-per-countryregion-for-woocommerce.pot', __FILE__) ); ?></p>		
+						<hr/>
+						<h4><?php _e('Please rate our plugin at WordPress.org', 'flat-rate-per-countryregion-for-woocommerce'); ?>:</h4>
+						<a href="https://wordpress.org/support/view/plugin-reviews/flat-rate-per-countryregion-for-woocommerce?filter=5#postform" target="_blank" style="text-align: center; display: block;">
+							<div class="star-rating"><div class="star star-full"></div><div class="star star-full"></div><div class="star star-full"></div><div class="star star-full"></div><div class="star star-full"></div></div>
+						</a>
+						<div class="clear"></div>
+					</div>
+					<div id="wc_flatrate_wd_settings">
+						<h3><?php echo $this->method_title; ?></h3>
+						<p><?php echo $this->method_description; ?></p>
+						<p><a href="#" onclick="jQuery('#WC_FRPC_Country_List').show(); return false;"><?php _e('Click here to see list of regions, and the countries included on each one.', 'flat-rate-per-countryregion-for-woocommerce'); ?></a></p>
+						<div id="WC_FRPC_Country_List">
+							<?php
+							foreach($this->regionslist as $key => $region) {
+								?>
+								<p><b><?php echo $region; ?>:</b><br/>
+								<?php
+								$countries=array();
+								foreach($this->regions[$key]['countries'] as $country) {
+									if (isset(WC()->countries->countries[$country]) && trim(WC()->countries->countries[$country])!='') $countries[]=WC()->countries->countries[$country];
+								}
+								sort($countries, SORT_LOCALE_STRING);
+								echo implode(', ', $countries);
+								?>
+								</p>
+								<?php
 							}
-						}
-						if (!$done) $countries[]=WC()->countries->countries[$code];
-					}
-					sort($countries, SORT_LOCALE_STRING);
-					echo implode(', ', $countries);
-					?>
-					</p>
-					<p style="text-align: center;">[<a href="#" onclick="jQuery('#WC_FRPC_Country_List').hide();"><?php _e('Close country list', 'flat-rate-per-countryregion-for-woocommerce'); ?></a>]</p>
+							?>
+							<hr/><p><b><?php _e('NOT ASSIGNED', 'flat-rate-per-countryregion-for-woocommerce'); ?>:</b><br/>
+							<?php
+							$countries=array();
+							foreach(WC()->countries->countries as $code => $country) {
+								$done=false;
+								foreach($this->regions as $region) {
+									if (in_array($code, $region['countries'])) {
+										$done=true;
+									}
+								}
+								if (!$done) $countries[]=WC()->countries->countries[$code];
+							}
+							sort($countries, SORT_LOCALE_STRING);
+							echo implode(', ', $countries);
+							?>
+							</p>
+							<p style="text-align: center;">[<a href="#" onclick="jQuery('#WC_FRPC_Country_List').hide(); return false;"><?php _e('Close country list', 'flat-rate-per-countryregion-for-woocommerce'); ?></a>]</p>
+						</div>
+						<table class="form-table">
+						<?php $this->generate_settings_html(); ?>
+						</table>
+					</div>
 				</div>
-				<table class="form-table">
-				<?php $this->generate_settings_html(); ?>
-				</table>
+				<div class="clear"></div>
 				<style type="text/css">
+					#wc_flatrate_wd_rightbar {
+						display: none;
+					}
+					@media (min-width: 961px) {
+						#wc_flatrate_wd {
+							height: auto;
+							overflow: hidden;
+						}
+						#wc_flatrate_wd_settings {
+							width: auto;
+							overflow: hidden;
+						}
+						#wc_flatrate_wd_rightbar {
+							display: block;
+							float: right;
+							width: 200px;
+							max-width: 20%;
+							margin-left: 20px;
+							padding: 15px;
+							background-color: #fff;
+						}
+						#wc_flatrate_wd_rightbar h4:first-child {
+							margin-top: 0px;
+						}
+						#wc_flatrate_wd_rightbar p {
+						}
+						#wc_flatrate_wd_rightbar p img {
+							max-width: 100%;
+							height: auto;
+						}
+					}
 					.form-table th {
 						width: 250px;
 					}

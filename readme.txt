@@ -4,8 +4,8 @@ Tags: woocommerce, shipping, delivery, ecommerce, e-commerce, country, countries
 Author URI: http://www.webdados.pt
 Plugin URI: http://www.webdados.pt/produtos-e-servicos/internet/desenvolvimento-wordpress/flat-rate-per-countryregion-woocommerce-wordpress/
 Requires at least: 3.8
-Tested up to: 4.2.4
-Stable tag: 2.4.1
+Tested up to: 4.3
+Stable tag: 2.4.2
 
 This plugin allows you to set a flat delivery rate per States, Countries or World Regions on WooCommerce.
 
@@ -51,6 +51,10 @@ Because of the way the WooCommerce Multilingual plugin registers the Shipping Me
 The plugin is quite recent, so no question is frequent. Ask us something ;-)
 
 == Changelog ==
+
+= 2.4.2 =
+* WPML: Reminder to translate the strings after saving the settings
+* Right sidebar on the settings page with technical support links
 
 = 2.4.1 =
 * Better installation instructions

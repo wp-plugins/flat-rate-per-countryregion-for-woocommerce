@@ -405,3 +405,31 @@ msgstr ""
 #: woocommerce_flatrate_percountry.php:1159
 msgid "Flat rate not set"
 msgstr ""
+
+#: woocommerce_flatrate_percountry.php:271
+msgid "You should now check and, if necessary, translate the rule names and method title on <a href="%s">WPML String Translation</a>"
+msgstr ""
+
+#: woocommerce_flatrate_percountry.php:729
+msgid "Free technical support (limited)"
+msgstr ""
+
+#: woocommerce_flatrate_percountry.php:731
+msgid "Premium technical support or custom WordPress / WooCommerce development"
+msgstr ""
+
+#: woocommerce_flatrate_percountry.php:732
+msgid "Please contact %s"
+msgstr ""
+
+#: woocommerce_flatrate_percountry.php:733
+msgid "Please rate our plugin at WordPress.org"
+msgstr ""
+
+#: woocommerce_flatrate_percountry.php:733
+msgid "Help us translate this plugin"
+msgstr ""
+
+#: woocommerce_flatrate_percountry.php:734
+msgid "Download the <a href="%s">.pot file</a> and send us the translation on your language"
+msgstr ""
